@@ -8,18 +8,13 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { checkCronAuth } from "@/lib/cron-auth";
 
 const RETENTION_DAYS = 7;
 const TARGET_BUCKETS = ["media-input", "media-artifacts"] as const;
 
-function checkAuth(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return true;
-  return (req.headers.get("authorization") ?? "") === `Bearer ${secret}`;
-}
-
 export async function GET(request: NextRequest) {
-  if (!checkAuth(request)) {
+  if (!checkCronAuth(request)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

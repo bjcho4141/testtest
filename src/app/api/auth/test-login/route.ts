@@ -13,28 +13,10 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { env, isProduction, isTestLoginEnabled } from "@/lib/env";
+import { isProduction, isTestLoginEnabled } from "@/lib/env";
+import { ipAllowed } from "@/lib/cli-auth";
 
 const SUPERADMIN_EMAIL = "bjcho9542@gmail.com";
-
-function ipAllowed(req: NextRequest): boolean {
-  const allowed = (process.env.CLI_ALLOWED_IPS ?? "127.0.0.1/32")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const xff = req.headers.get("x-forwarded-for") ?? "";
-  const ip = (xff.split(",")[0] || "").trim() || "127.0.0.1";
-
-  for (const cidr of allowed) {
-    const [base] = cidr.split("/");
-    if (ip === base) return true;
-    if (cidr === "127.0.0.1/32" && (ip === "127.0.0.1" || ip === "::1")) {
-      return true;
-    }
-  }
-  return false;
-}
 
 async function handle(request: NextRequest): Promise<NextResponse> {
   if (isProduction) {

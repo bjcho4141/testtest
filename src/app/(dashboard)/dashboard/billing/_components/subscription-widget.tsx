@@ -18,6 +18,7 @@ export function SubscriptionWidget({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const tpRef = useRef<TossPaymentsInstance | null>(null);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let canceled = false;
@@ -36,11 +37,18 @@ export function SubscriptionWidget({
     };
   }, [clientKey]);
 
+  useEffect(() => {
+    return () => {
+      if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    };
+  }, []);
+
   async function startBillingAuth() {
     if (!tpRef.current || submitting) return;
     setSubmitting(true);
     setError(null);
-    setTimeout(() => setSubmitting(false), 5000);
+    if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    lockTimerRef.current = setTimeout(() => setSubmitting(false), 5000);
 
     try {
       const payment = tpRef.current.payment({ customerKey });

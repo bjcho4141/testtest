@@ -14,6 +14,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { chargeWithBillingKey, SUBSCRIPTION_AMOUNT_KRW, SUBSCRIPTION_NAME } from "@/lib/toss";
 import { decrypt } from "@/lib/crypto";
+import { checkCronAuth } from "@/lib/cron-auth";
 
 type SubRow = {
   id: string;
@@ -31,15 +32,8 @@ type BkRow = {
   status: string;
 };
 
-function checkAuth(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return true; // 개발: 미설정 시 통과
-  const auth = req.headers.get("authorization") ?? "";
-  return auth === `Bearer ${secret}`;
-}
-
 export async function GET(request: NextRequest) {
-  if (!checkAuth(request)) {
+  if (!checkCronAuth(request)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

@@ -7,15 +7,10 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-
-function checkAuth(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return true;
-  return (req.headers.get("authorization") ?? "") === `Bearer ${secret}`;
-}
+import { checkCronAuth } from "@/lib/cron-auth";
 
 export async function GET(request: NextRequest) {
-  if (!checkAuth(request)) {
+  if (!checkCronAuth(request)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

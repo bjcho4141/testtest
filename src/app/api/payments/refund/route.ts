@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
   const secret = process.env.TOSS_SECRET_KEY;
   if (!secret) {
-    return NextResponse.json({ error: "TOSS_SECRET_KEY missing" }, { status: 500 });
+    return NextResponse.json({ error: "TOSS_SECRET_KEY missing" }, { status: 503 });
   }
   const auth = Buffer.from(`${secret}:`).toString("base64");
 

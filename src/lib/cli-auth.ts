@@ -22,7 +22,7 @@ function safeEqual(a: string, b: string): boolean {
   }
 }
 
-function ipAllowed(req: NextRequest): boolean {
+export function ipAllowed(req: NextRequest): boolean {
   const allowed = (process.env.CLI_ALLOWED_IPS ?? "127.0.0.1/32")
     .split(",")
     .map((s) => s.trim())

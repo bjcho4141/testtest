@@ -19,6 +19,7 @@ export function PaymentWidget({
   const [refundAgreed, setRefundAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const widgetsRef = useRef<TossPaymentsWidgets | null>(null);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let canceled = false;
@@ -51,6 +52,12 @@ export function PaymentWidget({
     };
   }, [clientKey, customerKey]);
 
+  useEffect(() => {
+    return () => {
+      if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    };
+  }, []);
+
   async function pay() {
     const widgets = widgetsRef.current;
     if (!widgets || submitting) return;
@@ -61,7 +68,8 @@ export function PaymentWidget({
     setSubmitting(true);
     setError(null);
     // 5초 disable 락 (중복 결제 방지 §13.3)
-    setTimeout(() => setSubmitting(false), 5000);
+    if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    lockTimerRef.current = setTimeout(() => setSubmitting(false), 5000);
 
     const orderId = `ord_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
     try {

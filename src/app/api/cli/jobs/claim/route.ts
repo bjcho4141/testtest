@@ -44,12 +44,9 @@ export async function POST(request: NextRequest) {
     license_source: string;
   };
 
-  await admin
-    .from("shorts_pairs")
-    .update({ status: "queued" } as never)
-    .eq("id", p.id);
-
-  await admin.from("conversion_jobs").insert({
+  // race: 다른 워커가 이미 같은 pair 를 선점한 경우 conversion_jobs UNIQUE
+  // (pair_id, stage, attempt) 23505 → null 반환 (이번 워커는 다음 사이클에 다시 시도)
+  const { error: insErr } = await admin.from("conversion_jobs").insert({
     pair_id: p.id,
     stage: "download",
     status: "running",
@@ -58,6 +55,21 @@ export async function POST(request: NextRequest) {
     attempt: 1,
     started_at: new Date().toISOString(),
   } as never);
+
+  if (insErr) {
+    if (insErr.code === "23505") {
+      return NextResponse.json({ ok: true, pair: null });
+    }
+    return NextResponse.json(
+      { error: `claim insert: ${insErr.message}` },
+      { status: 500 },
+    );
+  }
+
+  await admin
+    .from("shorts_pairs")
+    .update({ status: "queued" } as never)
+    .eq("id", p.id);
 
   return NextResponse.json({ ok: true, pair: p });
 }

@@ -15,6 +15,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/server";
+import { isProduction } from "@/lib/env";
 
 type TossWebhookBody = {
   eventType?: string;
@@ -32,8 +33,9 @@ type TossWebhookBody = {
 
 function verifySignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.TOSS_WEBHOOK_SECRET;
-  // secret 미설정 시 (도메인 등록 전) 검증 스킵 — 운영 시작 후 secret 등록 + 강제 활성
-  if (!secret) return true;
+  // production 에서 secret 미설정 시 fail-closed (security-team F-2)
+  // dev 에서는 도메인 등록 전 임시 통과 허용
+  if (!secret) return !isProduction;
   if (!signature) return false;
   const expected = createHmac("sha256", secret).update(rawBody).digest("base64");
   try {
