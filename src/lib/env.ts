@@ -20,6 +20,10 @@ const REQUIRED_SERVER: ReadonlyArray<keyof EnvShape> = [
   "SUPABASE_SERVICE_ROLE_KEY",
 ];
 
+// 빌드 시점 (Vercel) 검증 스킵 — page data collection 단계에 env 미주입 가능.
+// 실제 런타임 접근 시점에 lazy 검증 + throw.
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+
 function readEnv(): EnvShape {
   const missing: string[] = [];
 
@@ -38,22 +42,32 @@ function readEnv(): EnvShape {
     }
   }
 
-  if (missing.length > 0) {
+  if (missing.length > 0 && !isBuildPhase) {
     throw new Error(
       `[env] Missing required environment variables: ${missing.join(", ")}. ` +
-        `Check .env.local against .env.example.`,
+        `Local dev: check .env.local against .env.example. ` +
+        `Vercel: Project Settings → Environment Variables.`,
     );
   }
 
   return {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
     NEXT_PUBLIC_ALLOW_TEST_LOGIN: process.env.NEXT_PUBLIC_ALLOW_TEST_LOGIN,
   };
 }
 
-export const env = readEnv();
+// Lazy Proxy — import 시점에는 readEnv() 호출 X. 첫 속성 접근 시점에 검증.
+// 빌드 시점 (NEXT_PHASE='phase-production-build') 에는 검증 스킵, 빈 문자열 반환.
+let _cached: EnvShape | null = null;
+
+export const env = new Proxy({} as EnvShape, {
+  get(_target, prop: string) {
+    if (!_cached) _cached = readEnv();
+    return _cached[prop as keyof EnvShape];
+  },
+});
 
 export const isProduction =
   process.env.VERCEL_ENV === "production" ||

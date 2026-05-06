@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
+// 인증 / 결제 게이트 동적 페이지 — 정적 prerender 회피
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {
