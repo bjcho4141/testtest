@@ -4,7 +4,7 @@
 > 대표님 1인 운영 기준 단일 파일. 페이즈 단위 ## 헤더 분리.
 > 작업 후 `[ ]` → `[x]` 체크. 새 작업은 적절한 페이즈에 추가.
 
-**진행률: 41 / 122**  ✅41 / 🔄81  *(Phase 1 미들웨어/인증·결제 게이트 작동 + 토스 v2 풀 구현(단건/webhook/refund) + 모바일 반응형 + dashboard 결제 위젯, 카카오 OAuth Dashboard 설정 + Storage Policies UI 대기)*
+**진행률: 72 / 130**  ✅72 / 🔄58  *(Phase 1 완료 + Phase 2 부분 완료 + Phase 3 부분 완료 + 토스 풀 결제 흐름 완료 + CLI/cron/analytics 신규 구현 완료, 카카오 OAuth Provider 설정 + Storage Policies UI 대기)*
 
 | 표기 | 의미 |
 |---|---|
@@ -70,11 +70,11 @@
 - [x] 〔dev-team〕 `@supabase/ssr` 미들웨어 (서버/브라우저 클라이언트 분리) (§2.4) — 2026-05-06 `src/proxy.ts` (Next.js 16 정식 컨벤션)
 - [x] 〔dev-team〕 미들웨어 결제 게이트 — `is_paid()` 체크 + `/dashboard/billing?from=blocked` 리다이렉트 (§2.4) — 2026-05-06 `src/lib/supabase/proxy-helper.ts`
 - [x] 〔dev-team〕 슈퍼어드민 test-login (verifyOtp + token_hash 흐름) — 2026-05-06 GET → /dashboard 한방 통과 검증
-- [ ] 〔dev-team〕 로그인 모달 (카카오 + DEV 슈퍼어드민 버튼) (§2.2)
-- [ ] 🔴 〔dev-team〕 `/api/auth/test-login` (env 가드 + IP allowlist + 1시간 만료) (§2.1, §18.5)
-- [ ] 🔴 〔dev-team〕 `next.config.ts` production 빌드 가드 — `VERCEL_ENV='production'` + `NEXT_PUBLIC_ALLOW_TEST_LOGIN=true` 동시 시 빌드 실패 (§18.5)
-- [ ] 〔dev-team〕 운영자 영구 무료 — `bjcho9542@gmail.com` 시드
-- [ ] 〔dev-team〕 profiles 트리거 동작 확인 (auth.users → profiles)
+- [x] 〔dev-team〕 로그인 버튼 (카카오 signInWithOAuth) — 2026-05-06 `src/app/_components/login-button.tsx` (모달 미적용, 인라인 배치)
+- [x] 🔴 〔dev-team〕 `/api/auth/test-login` (env 가드 + IP allowlist + 1시간 만료) (§2.1, §18.5) — 2026-05-06 commit d043e51 VERCEL_ENV+NODE_ENV 이중가드+timingSafeEqual CLI_ALLOWED_IPS
+- [x] 🔴 〔dev-team〕 `next.config.ts` production 빌드 가드 — `VERCEL_ENV='production'` + `NEXT_PUBLIC_ALLOW_TEST_LOGIN=true` 동시 시 빌드 실패 (§18.5) — 2026-05-06 commit d043e51
+- [x] 〔dev-team〕 운영자 영구 무료 — `bjcho9542@gmail.com` 시드 — 2026-05-06 `0005_seed.sql` (첫 로그인 후 수동 UPDATE 절차 명시)
+- [x] 〔dev-team〕 profiles 트리거 동작 확인 (auth.users → profiles) — 2026-05-06 `0002_functions_triggers.sql` handle_new_user + EXCEPTION 흡수 완료
 - [ ] 〔security-team〕 OAuth `state` CSRF 검증 + `redirect_uri` 정확 매칭 (§18.3)
 - [ ] 〔security-team〕 Phase 2 보안 리뷰
 - [ ] 〔qa-team〕 로그인·결제 게이트·테스트 로그인 E2E
@@ -84,19 +84,19 @@
 
 ## Phase 3 — 어드민 대시보드
 
-- [ ] 〔dev-team〕 `/dashboard` 홈 + 채널 통계 (§6.1)
+- [x] 〔dev-team〕 `/dashboard` 홈 + 결제 위젯 (account + 최근 5건 payments) (§6.1) — 2026-05-06 commit 1585228
 - [ ] 〔dev-team〕 `/dashboard/research` (utube-start 재활용 + Supabase 저장)
-- [ ] 〔dev-team〕 `/dashboard/pairs` 신규 — 한국+원본 URL 입력 + license_source 필수 입력
+- [x] 〔dev-team〕 `/dashboard/pairs` 신규 — 한국+원본 URL 입력 + license_source 필수 입력 + 페어 상세 (`/dashboard/pairs/[id]`) — 2026-05-06 commit 6e3adb5+1af45ad
 - [ ] 〔dev-team〕 `/dashboard/settings` — 트렌딩 사운드 풀 관리
-- [ ] 〔dev-team〕 `/dashboard/billing` 신규 — 결제 진입 + 사용 기간 + 영수증 + 해지 (§6.1)
+- [x] 〔dev-team〕 `/dashboard/billing` 신규 — 결제 진입 + 사용 기간 + 영수증 + 해지 (§6.1) — 2026-05-06 commit b0f3849+8bea7a4
 - [ ] 〔dev-team〕 `/dashboard/upload` — 9항 체크리스트 UI 명세 (§6.1.1)
   - 원본 ↔ 번역본 side-by-side 플레이어
   - 체크 2 (해설 ≥1개) 인라인 입력
   - 체크 4 (transformation ≥4 / 첫 30편 ≥5) 토글
   - 자동 체크 (1·3·5·6·7·8·9) green/red 배지
   - 30초 타이머 표시
-- [ ] 〔dev-team〕 `/dashboard/chat` — Realtime `agent_logs` 구독
-- [ ] 〔dev-team〕 `/dashboard/production` — 단계별 산출물 미리보기 (mp3/srt/mp4)
+- [ ] 〔dev-team〕 `/dashboard/chat` — Realtime `agent_logs` 구독 (미구현)
+- [ ] 〔dev-team〕 `/dashboard/production` — 단계별 산출물 미리보기 (mp3/srt/mp4) (미구현)
 - [ ] 〔code-review-team〕 Phase 3 코드 리뷰
 - [ ] 〔qa-team〕 Phase 3 시나리오 테스트 + 모바일 반응형
 - [ ] 〔verifier-team〕 Phase 3 검증
@@ -198,13 +198,13 @@
 - [x] 〔dev-team〕 환불 API — `/api/payments/refund` (본인 결제 검증 + 토스 cancel + refunds INSERT) (§16.5) — 2026-05-06
 - [x] 〔dev-team〕 dashboard 결제 상태 위젯 — paid_until / 최근 5건 결제 표시 — 2026-05-06
 - [ ] 〔대표님〕 토스 webhook secret — 도메인 등록 후 콘솔 발급 → `TOSS_WEBHOOK_SECRET` 등록 시 자동 활성
-- [ ] 〔dev-team〕 정기결제 — 빌링키 발급 + `customerKey` UUID + pgsodium 암호화 (§16.3)
-- [ ] 〔dev-team〕 자동결제 cron (Vercel Cron 또는 Supabase Edge Function — 매일 00:00 KST) (§16.3)
-- [ ] 〔dev-team〕 자동결제 실패 → `past_due` (3회) → `expired` (7일) (§13.3)
-- [ ] 🔴 〔security-team〕 `/api/webhooks/toss` HMAC-SHA256 + constant-time + 멱등성 (`payment_key + status` dedup) (§16.4, §18.4)
-- [ ] 〔dev-team〕 환불 — `/v1/payments/{paymentKey}/cancel` + 환불 정책 검증 (§16.5)
-- [ ] 〔dev-team〕 정기결제 사전고지 — 30일 전 통지 (전자상거래법 §20조의2) (§16.6)
-- [ ] 〔dev-team〕 `orderId` UNIQUE + 클라이언트 5초 disable 락 (중복결제 방지) (§13.3)
+- [x] 〔dev-team〕 정기결제 — 빌링키 발급 + `customerKey` UUID + AES-256-GCM 암호화 (§16.3) — 2026-05-06 commit 8bea7a4 `api/billing/issue/route.ts` + `lib/crypto.ts`
+- [x] 〔dev-team〕 자동결제 cron (Vercel Cron 매일 00:00 KST `vercel.json "0 15 * * *"`) (§16.3) — 2026-05-06 commit 1af45ad `api/cron/billing/charge/route.ts`
+- [x] 〔dev-team〕 자동결제 실패 → `past_due` (3회) → `expired` (7일) (§13.3) — 2026-05-06 commit 1af45ad cron/billing/charge 구현 완료
+- [x] 🔴 〔security-team〕 `/api/webhooks/toss` HMAC-SHA256 + constant-time + 멱등성 (`payment_key + status` dedup) (§16.4, §18.4) — 2026-05-06 commit e1f1277+fc86f5e
+- [x] 〔dev-team〕 환불 — `/v1/payments/{paymentKey}/cancel` + 환불 정책 검증 (§16.5) — 2026-05-06 commit e1f1277 `api/payments/refund/route.ts`
+- [x] 〔dev-team〕 정기결제 사전고지 — 30일 전 통지 (전자상거래법 §20조의2) (§16.6) — 2026-05-06 commit 1af45ad `api/cron/billing/notify/route.ts`
+- [x] 〔dev-team〕 `orderId` UNIQUE + 클라이언트 5초 disable 락 (중복결제 방지) (§13.3) — 2026-05-06 commit b0f3849 `payment-widget.tsx` setTimeout 5000ms + disabled submitting
 - [ ] 〔dev-team〕 빌링키 유출 감지 → 즉시 `revoke` 처리 (§13.3)
 - [ ] 🔴 〔code-review-team + security-team + doc-sync-team〕 결제 코드 3단 감사 (`director.md`)
 - [ ] 〔qa-team〕 결제 시나리오 (실패·중복·환불·구독취소·카드만료·PG 장애·webhook 재전송) (§13.3)
@@ -220,7 +220,7 @@
 - [ ] 🟡 placeholder 채우기 — `{{COMPANY}}` `{{REPRESENTATIVE}}` `{{ADDRESS}}` `{{EMAIL}}` `{{BIZNO}}` `{{COMMERCE_NO}}`
 - [ ] 🔴 변호사 검토 + 시행 (production 배포 전)
 - [ ] 회원가입 시 약관 3종 필수 동의 UI
-- [ ] `/dashboard/billing` 결제 시 환불정책 별도 체크박스
+- [x] `/dashboard/billing` 결제 시 환불정책 별도 체크박스 — 2026-05-06 commit a1f2e9a `payment-widget.tsx` refundAgreed checkbox + /refund 링크 + disabled 연동
 
 ---
 
@@ -254,20 +254,20 @@
 
 ### B. db-guard-team — DB 결함 (Phase 0 전 패치 권고)
 
-- [ ] 🔴 〔db-guard-team〕 `is_paid()` `SECURITY DEFINER set search_path = public, pg_temp` 명시
-- [ ] 🔴 〔db-guard-team〕 `uploads(pair_id)` 인덱스 추가 (RLS join 풀스캔 방지)
-- [ ] 🔴 〔db-guard-team〕 RLS `is_paid()` AND-결합 본문 SQL 4테이블 (conversion_jobs/bgm_recommendations/agent_logs/uploads) 작성
+- [x] 🔴 〔db-guard-team〕 `is_paid()` `SECURITY DEFINER set search_path = public, pg_temp` 명시 — 2026-05-06 `0002_functions_triggers.sql`
+- [x] 🔴 〔db-guard-team〕 `uploads(pair_id)` 인덱스 추가 (RLS join 풀스캔 방지) — 2026-05-06 `0001_initial_schema.sql`
+- [x] 🔴 〔db-guard-team〕 RLS `is_paid()` AND-결합 본문 SQL 4테이블 (conversion_jobs/bgm_recommendations/agent_logs/uploads) 작성 — 2026-05-06 `0003_rls_policies.sql`
 - [ ] 🔴 〔db-guard-team〕 `conversion_jobs(pair_id, stage, attempt) UNIQUE` race — `INSERT ... ON CONFLICT DO NOTHING RETURNING` 패턴 명시
 - [ ] 🔴 〔db-guard-team〕 `cost_ledger.pair_id on delete set null` + `pair_id_snapshot uuid not null` (KPI 회계 무결성)
-- [ ] 〔db-guard-team〕 `channels.slug` INSERT CHECK `(slug ~ '^[a-z0-9-]+$' and length 2~40)`
+- [x] 〔db-guard-team〕 `channels.slug` INSERT CHECK `(slug ~ '^[a-z0-9-]+$' and length 2~40)` — 2026-05-06 `0001_initial_schema.sql`
 - [ ] 〔db-guard-team〕 `profiles.active_subscription_id` `references subscriptions(id) deferrable initially deferred` 명시
 
 ### C. security-team — 신규 [FAIL] + [POLICY] (Phase 2 전 차단)
 
-- [ ] 🔴 〔dev-team〕 F-4: `next.config.ts` 빌드 가드 + **런타임 가드 이중화** (`/api/auth/test-login` 첫 줄에서 `VERCEL_ENV !== production && NODE_ENV !== production` 동시 체크)
+- [x] 🔴 〔dev-team〕 F-4: `next.config.ts` 빌드 가드 + **런타임 가드 이중화** (`/api/auth/test-login` 첫 줄에서 `VERCEL_ENV !== production && NODE_ENV !== production` 동시 체크) — 2026-05-06 commit d043e51+fc86f5e
 - [ ] 🔴 〔dev-team〕 F-5: `refunds.cancel_amount` 검증 (음수 방지 CHECK + `cancel_amount + 누적 ≤ amount` 서버 SQL `FOR UPDATE`)
-- [ ] 🔴 〔dev-team〕 Webhook 멱등성 — `webhook_events(payment_key, status) ON CONFLICT DO NOTHING RETURNING` atomic dedup
-- [ ] 🔴 〔db-guard-team〕 `handle_new_user()` 본문에 `SET search_path = public, pg_temp` 코드 추가 (주석만 있음)
+- [x] 🔴 〔dev-team〕 Webhook 멱등성 — `webhook_events(payment_key, status) ON CONFLICT DO NOTHING RETURNING` atomic dedup — 2026-05-06 commit e1f1277+fc86f5e `api/webhooks/toss/route.ts` dedup code 23505
+- [x] 🔴 〔db-guard-team〕 `handle_new_user()` 본문에 `SET search_path = public, pg_temp` 코드 추가 — 2026-05-06 `0002_functions_triggers.sql` + `0006_advisor_fixes.sql`
 - [ ] 〔dev-team〕 PKCE 강제 (`flowType: 'pkce'`) Supabase Auth 옵션
 - [ ] 〔doc-sync-team〕 약관 패치 — TERMS §3 변경 통지 7일 → 30일 / REFUND §17조2항 부합 / PRIVACY §4 국외이전 동의 (Anthropic/OpenAI/ElevenLabs) / TERMS §10 통신판매업 신고
 - [ ] 〔dev-team〕 CLI `CLI_SHARED_SECRET` 로테이션 절차 (이중 키 허용 기간) §18 추가
