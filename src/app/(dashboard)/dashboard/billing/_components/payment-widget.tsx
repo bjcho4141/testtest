@@ -69,16 +69,19 @@ export function PaymentWidget({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border p-4 bg-neutral-50 dark:bg-neutral-900 text-sm">
-        월 구독 — <strong>{AMOUNT.toLocaleString("ko-KR")}원</strong> · {ORDER_NAME}
+    <div className="space-y-4 w-full">
+      <div className="rounded-md border p-3 sm:p-4 bg-neutral-50 dark:bg-neutral-900 text-sm">
+        월 구독 — <strong>{AMOUNT.toLocaleString("ko-KR")}원</strong>
+        <span className="block sm:inline sm:ml-1 text-xs sm:text-sm" style={{ color: "var(--muted)" }}>
+          · {ORDER_NAME}
+        </span>
       </div>
-      <div id="payment-method" />
-      <div id="agreement" />
+      <div id="payment-method" className="w-full" />
+      <div id="agreement" className="w-full" />
       {error && (
         <p className="text-xs text-red-600 break-words">결제 위젯 오류: {error}</p>
       )}
-      <Button size="lg" onClick={pay} disabled={!ready}>
+      <Button size="lg" onClick={pay} disabled={!ready} className="w-full sm:w-auto">
         {ready ? "결제하기" : "결제 위젯 로딩…"}
       </Button>
     </div>

@@ -30,7 +30,7 @@ export default async function BillingPage({
   if (!user) redirect("/?login=required");
 
   return (
-    <div className="space-y-4 max-w-2xl">
+    <div className="space-y-4 w-full max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold">결제</h1>
 
       {from === "blocked" && (

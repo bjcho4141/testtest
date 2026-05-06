@@ -15,9 +15,24 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser();
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* 모바일 상단 네비 */}
+      <header
+        className="md:hidden flex items-center justify-between border-b px-4 py-3 sticky top-0 z-10 bg-[var(--background,#fff)]"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <div className="text-xs uppercase tracking-wider" style={{ color: "var(--muted)" }}>
+          utube-shorts-jp
+        </div>
+        <nav className="flex items-center gap-1">
+          <NavLink href="/dashboard">홈</NavLink>
+          <NavLink href="/dashboard/billing">결제</NavLink>
+        </nav>
+      </header>
+
+      {/* 데스크톱 사이드바 */}
       <aside
-        className="w-60 border-r p-4 flex flex-col gap-2"
+        className="hidden md:flex w-60 border-r p-4 flex-col gap-2"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="text-xs uppercase tracking-wider mb-3" style={{ color: "var(--muted)" }}>
@@ -25,11 +40,12 @@ export default async function DashboardLayout({
         </div>
         <NavLink href="/dashboard">홈</NavLink>
         <NavLink href="/dashboard/billing">결제</NavLink>
-        <div className="mt-auto pt-4 text-xs" style={{ color: "var(--muted)" }}>
+        <div className="mt-auto pt-4 text-xs break-all" style={{ color: "var(--muted)" }}>
           {user?.email ?? "anonymous"}
         </div>
       </aside>
-      <section className="flex-1 p-8">{children}</section>
+
+      <section className="flex-1 p-4 md:p-8 min-w-0">{children}</section>
     </div>
   );
 }
