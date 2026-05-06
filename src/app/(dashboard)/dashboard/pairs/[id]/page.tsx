@@ -9,6 +9,7 @@ import { ReviewActions } from "./_components/review-actions";
 import { MetaEditor } from "./_components/meta-editor";
 import { DeleteButton } from "./_components/delete-button";
 import { StageList, type StageJob } from "./_components/stage-list";
+import { VoicePicker } from "./_components/voice-picker";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,9 @@ export default async function PairDetailPage({
   const p = pair as PairFull;
   const resultMeta = (p.original_meta?.result ?? null) as
     | { title?: string; description?: string; tags?: string[] }
+    | null;
+  const voiceMeta = (p.original_meta?.voice ?? null) as
+    | { voice_id?: string; model_id?: string }
     | null;
   if (p.channels && p.channels.owner_id !== user.id) notFound();
 
@@ -102,6 +106,11 @@ export default async function PairDetailPage({
       <section className="space-y-2">
         <h2 className="font-semibold text-sm">업로드 메타</h2>
         <MetaEditor pairId={p.id} initial={resultMeta} />
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="font-semibold text-sm">변환 옵션</h2>
+        <VoicePicker pairId={p.id} initial={voiceMeta} />
       </section>
 
       <section className="rounded-md border p-4 space-y-2 text-sm" style={{ borderColor: "var(--border)" }}>
