@@ -6,11 +6,14 @@
  *   2. 런타임 가드: VERCEL_ENV !== production && NODE_ENV !== production
  *   3. NEXT_PUBLIC_ALLOW_TEST_LOGIN === 'true' 명시
  *   4. IP allowlist (CLI_ALLOWED_IPS, 기본 127.0.0.1/32)
- *   5. 1시간 만료 토큰 (Supabase 세션 자체 만료 + cookie maxAge=3600)
+ *   5. 1시간 만료 토큰 (Supabase 세션 자체 만료)
+ *
+ * 흐름: admin.generateLink → token 추출 → /auth/v1/verify POST 직접 호출
+ *       → access/refresh token 받아 SSR 클라로 setSession (쿠키 자동 set) → /dashboard redirect
  */
 import { NextResponse, type NextRequest } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
-import { isProduction, isTestLoginEnabled } from "@/lib/env";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { env, isProduction, isTestLoginEnabled } from "@/lib/env";
 
 const SUPERADMIN_EMAIL = "bjcho9542@gmail.com";
 
@@ -23,7 +26,6 @@ function ipAllowed(req: NextRequest): boolean {
   const xff = req.headers.get("x-forwarded-for") ?? "";
   const ip = (xff.split(",")[0] || "").trim() || "127.0.0.1";
 
-  // CIDR 매칭은 단순 prefix 비교 (운영에서 정밀 매칭 필요 시 cidr-matcher 추가)
   for (const cidr of allowed) {
     const [base] = cidr.split("/");
     if (ip === base) return true;
@@ -34,52 +36,50 @@ function ipAllowed(req: NextRequest): boolean {
   return false;
 }
 
-export async function POST(request: NextRequest) {
-  // 가드 #2 — 런타임 production 차단 (이중화)
+async function handle(request: NextRequest): Promise<NextResponse> {
   if (isProduction) {
-    console.error(
-      "[test-login] BLOCKED: production runtime detected. " +
-        "VERCEL_ENV=" +
-        process.env.VERCEL_ENV +
-        " NODE_ENV=" +
-        process.env.NODE_ENV,
-    );
     return NextResponse.json(
       { error: "test-login is disabled in production" },
       { status: 500 },
     );
   }
-
-  // 가드 #3 — 명시적 옵트인
   if (!isTestLoginEnabled) {
     return NextResponse.json(
       { error: "NEXT_PUBLIC_ALLOW_TEST_LOGIN must be 'true' in dev" },
       { status: 403 },
     );
   }
-
-  // 가드 #4 — IP allowlist
   if (!ipAllowed(request)) {
     return NextResponse.json({ error: "ip not allowed" }, { status: 403 });
   }
 
   const admin = createAdminClient();
-
-  // magic link 생성 (1시간 만료는 Supabase 기본)
-  const { data, error } = await admin.auth.admin.generateLink({
+  const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
     type: "magiclink",
     email: SUPERADMIN_EMAIL,
-    options: { redirectTo: `${request.nextUrl.origin}/auth/callback` },
   });
-
-  if (error) {
-    console.error("[test-login] generateLink error:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (linkErr || !linkData?.properties?.hashed_token) {
+    return NextResponse.json(
+      { error: linkErr?.message ?? "no hashed_token" },
+      { status: 500 },
+    );
   }
 
-  return NextResponse.json({
-    ok: true,
-    actionLink: data.properties?.action_link,
-    expiresIn: 3600,
+  // SSR 클라로 verifyOtp 호출 → 성공 시 cookieStore.set 자동 실행
+  const supabase = await createClient();
+  const { error: verifyErr } = await supabase.auth.verifyOtp({
+    token_hash: linkData.properties.hashed_token,
+    type: "magiclink",
   });
+  if (verifyErr) {
+    return NextResponse.json(
+      { error: `verifyOtp failed: ${verifyErr.message}` },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.redirect(new URL("/dashboard", request.nextUrl.origin));
 }
+
+export const GET = handle;
+export const POST = handle;
