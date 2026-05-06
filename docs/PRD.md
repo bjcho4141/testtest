@@ -3,7 +3,7 @@
 > 최종 업데이트: 2026-05-04
 > 베이스 프로젝트: `/Users/cho/Desktop/4141/utube-start` (포크)
 > 작성자: bjcho9542@gmail.com
-> 정책 가이드: 본 PRD의 모든 게이트·스키마·UI 결정은 [`YOUTUBE_POLICY.md`](./YOUTUBE_POLICY.md)를 1차 자료로 따른다. 정책 변경 시 그 문서를 먼저 갱신하고 본 PRD 해당 섹션을 동기화한다.
+> 정책 가이드: 본 PRD의 모든 게이트·스키마·UI 결정은 [`policy/YOUTUBE_POLICY.md`](./policy/YOUTUBE_POLICY.md)를 1차 자료로 따른다. 정책 변경 시 그 문서를 먼저 갱신하고 본 PRD 해당 섹션을 동기화한다.
 
 ---
 
@@ -1195,7 +1195,7 @@ SELECT id FROM subscriptions WHERE status='active' AND next_charge_at <= now()
 ```
 [사용자] /dashboard/billing → 환불 버튼
   ↓ POST /api/payments/cancel { paymentId, cancelReason, cancelAmount? }
-[서버] 환불 정책 검증 (docs/REFUND.md):
+[서버] 환불 정책 검증 (docs/legal/REFUND.md):
   - 일반결제: 사용 시작 전 100% / 후 비례 (변환 1편당 10% 차감)
   - 정기결제: 7일 내 100% (변환 0편 조건) / 7일 후 일할 계산
   ↓ POST /v1/payments/{paymentKey}/cancel
@@ -1224,9 +1224,9 @@ SELECT id FROM subscriptions WHERE status='active' AND next_charge_at <= now()
 
 | 문서 | 경로 | 내용 |
 |---|---|---|
-| 이용약관 | [`docs/TERMS.md`](./docs/TERMS.md) | 회원·콘텐츠 책임·면책·분쟁 |
-| 개인정보처리방침 | [`docs/PRIVACY.md`](./docs/PRIVACY.md) | 수집 항목·보유 기간·제3자 제공 |
-| 환불정책 | [`docs/REFUND.md`](./docs/REFUND.md) | 청약철회·일반/정기 환불 비율·환불 절차 |
+| 이용약관 | [`docs/legal/TERMS.md`](./legal/TERMS.md) | 회원·콘텐츠 책임·면책·분쟁 |
+| 개인정보처리방침 | [`docs/legal/PRIVACY.md`](./legal/PRIVACY.md) | 수집 항목·보유 기간·제3자 제공 |
+| 환불정책 | [`docs/legal/REFUND.md`](./legal/REFUND.md) | 청약철회·일반/정기 환불 비율·환불 절차 |
 
 세 문서 모두 **한국 SaaS 표준 1차 작성**이며 변호사 검토 후 시행. 회원가입 시 모든 약관 필수 동의. `/dashboard/billing` 결제 시 환불정책 별도 체크박스 동의.
 

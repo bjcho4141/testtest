@@ -193,8 +193,8 @@ sqlite3 .harness/chat.db "INSERT INTO harness_messages (id, \"from\", \"to\", ty
 - **프레임워크**: Next.js 16 App Router (Vercel 배포) · **DB**: Supabase Postgres + RLS · **UI**: Tailwind v4 + shadcn/ui
 - **인증**: Kakao OAuth (Supabase native) + 슈퍼어드민 테스트 로그인 (DEV 전용)
 - **결제**: 토스페이먼츠 (일반 ₩9,900/30일, 정기 ₩9,900/월)
-- **법적 컨텍스트**: 한국 B2C SaaS — `docs/TERMS.md` / `PRIVACY.md` / `REFUND.md` (변호사 검토 필요)
-- **태스크 트래커**: `docs/TASKS.md` (단일 파일 92개 태스크) · **PRD**: `docs/PRD.md` · **정책**: `docs/YOUTUBE_POLICY.md`
+- **법적 컨텍스트**: 한국 B2C SaaS — `docs/legal/TERMS.md` / `PRIVACY.md` / `REFUND.md` (변호사 검토 필요)
+- **태스크 트래커**: `docs/TASKS.md` (단일 파일 92개 태스크) · **PRD**: `docs/PRD.md` · **정책**: `docs/policy/YOUTUBE_POLICY.md`
 - **Git**: `gh auth: bjcho4141` · remote: `https://github.com/bjcho4141/testtest`
 - **상세 규약**: 루트 `CLAUDE.md` + `docs/PRD.md`
 

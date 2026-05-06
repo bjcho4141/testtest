@@ -18,9 +18,9 @@
 | 문서 | 용도 |
 |---|---|
 | [`docs/PRD.md`](./docs/PRD.md) | 제품 요구사항 (SaaS v2, 1300줄) |
-| [`docs/YOUTUBE_POLICY.md`](./docs/YOUTUBE_POLICY.md) | YouTube Shorts 정책 가이드 (G1~G5) |
+| [`docs/policy/YOUTUBE_POLICY.md`](./docs/policy/YOUTUBE_POLICY.md) | YouTube Shorts 정책 가이드 (G1~G5) |
 | [`docs/TASKS.md`](./docs/TASKS.md) | 92개 태스크 트래커 (페이즈별) |
-| [`docs/TERMS.md`](./docs/TERMS.md) · [`PRIVACY.md`](./docs/PRIVACY.md) · [`REFUND.md`](./docs/REFUND.md) | 한국 SaaS 약관 1차 (변호사 검토 필요) |
+| [`docs/legal/TERMS.md`](./docs/legal/TERMS.md) · [`PRIVACY.md`](./docs/legal/PRIVACY.md) · [`REFUND.md`](./docs/legal/REFUND.md) | 한국 SaaS 약관 1차 (변호사 검토 필요) |
 | [`docs/AGENT_LEARNING_LOG.md`](./docs/AGENT_LEARNING_LOG.md) | 에이전트 학습 로그 |
 | [`CLAUDE.md`](./CLAUDE.md) | Claude Code 하네스 룰 (부장 + 16팀) |
 

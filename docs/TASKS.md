@@ -196,9 +196,9 @@
 
 ## 📋 약관·법적 (Phase 1 진입 전 placeholder, 시행은 변호사 검토 후)
 
-- [x] `docs/TERMS.md` 1차 작성
-- [x] `docs/PRIVACY.md` 1차 작성
-- [x] `docs/REFUND.md` 1차 작성
+- [x] `docs/legal/TERMS.md` 1차 작성
+- [x] `docs/legal/PRIVACY.md` 1차 작성
+- [x] `docs/legal/REFUND.md` 1차 작성
 - [ ] 🟡 placeholder 채우기 — `{{COMPANY}}` `{{REPRESENTATIVE}}` `{{ADDRESS}}` `{{EMAIL}}` `{{BIZNO}}` `{{COMMERCE_NO}}`
 - [ ] 🔴 변호사 검토 + 시행 (production 배포 전)
 - [ ] 회원가입 시 약관 3종 필수 동의 UI

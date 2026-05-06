@@ -14,7 +14,7 @@
 
 - **한국 SaaS PRD에 결제 추가 시 동시 챙길 항목 (체크리스트)**:
   1. 보안 [FAIL] 3건 — `oauth_refresh_token` Vault 암호화 / RLS `whitelisted` AND-결합 / `/api/cli/*` Bearer + IP allowlist
-  2. 약관·개인정보·환불 3종 — `docs/TERMS.md` / `PRIVACY.md` / `REFUND.md` (전자상거래법 §17·§20조의2)
+  2. 약관·개인정보·환불 3종 — `docs/legal/TERMS.md` / `PRIVACY.md` / `REFUND.md` (전자상거래법 §17·§20조의2)
   3. 슈퍼어드민 테스트 모드 가드 — env (`NEXT_PUBLIC_ALLOW_TEST_LOGIN`) + production 빌드 실패 가드
   4. 토스 Webhook HMAC-SHA256 + 멱등성, 빌링키 pgsodium 암호화, `customerKey` UUID 예측 불가
   5. DB: `payments` / `billing_keys` / `subscriptions` / `refunds` / `cost_ledger` 5테이블 + `profiles.paid_until` / `subscription_status` / `kakao_id` 컬럼
