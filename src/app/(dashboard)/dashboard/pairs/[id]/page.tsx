@@ -2,6 +2,8 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
+import { OutputPlayer } from "./_components/output-player";
+import { AutoRefresh } from "./_components/auto-refresh";
 
 export const dynamic = "force-dynamic";
 
@@ -96,12 +98,18 @@ export default async function PairDetailPage({
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <AutoRefresh status={p.status} />
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">영상 페어</h1>
         <Link href="/dashboard/pairs" className={buttonVariants({ variant: "outline", size: "sm" })}>
           ← 목록
         </Link>
       </div>
+
+      <section className="space-y-2">
+        <h2 className="font-semibold text-sm">결과 영상</h2>
+        <OutputPlayer pairId={p.id} status={p.status} />
+      </section>
 
       <section className="rounded-md border p-4 space-y-2 text-sm" style={{ borderColor: "var(--border)" }}>
         <h2 className="font-semibold">기본 정보</h2>
