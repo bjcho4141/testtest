@@ -6,27 +6,11 @@ import { OutputPlayer } from "./_components/output-player";
 import { AutoRefresh } from "./_components/auto-refresh";
 import { RetryButton } from "./_components/retry-button";
 import { ReviewActions } from "./_components/review-actions";
+import { MetaEditor } from "./_components/meta-editor";
+import { DeleteButton } from "./_components/delete-button";
+import { StageList, type StageJob } from "./_components/stage-list";
 
 export const dynamic = "force-dynamic";
-
-const STAGE_LABEL: Record<string, string> = {
-  download: "다운로드",
-  stt: "음성 인식",
-  translation: "번역",
-  tts: "일본어 TTS",
-  demucs: "음성 분리",
-  crop: "9:16 크롭",
-  subtitle: "자막",
-  render: "렌더",
-  review: "검수",
-};
-
-const JOB_STATUS_CLS: Record<string, string> = {
-  queued: "bg-neutral-100 text-neutral-700",
-  running: "bg-blue-100 text-blue-800",
-  done: "bg-green-100 text-green-800",
-  failed: "bg-red-100 text-red-700",
-};
 
 export default async function PairDetailPage({
   params,
@@ -43,7 +27,7 @@ export default async function PairDetailPage({
   const { data: pair } = await supabase
     .from("shorts_pairs")
     .select(
-      "id, channel_id, korean_url, original_url, license_source, license_evidence_url, status, transformation_count, created_at, channels(slug, name, owner_id)",
+      "id, channel_id, korean_url, original_url, license_source, license_evidence_url, status, transformation_count, original_meta, created_at, channels(slug, name, owner_id)",
     )
     .eq("id", id)
     .single();
@@ -59,10 +43,14 @@ export default async function PairDetailPage({
     license_evidence_url: string;
     status: string;
     transformation_count: number;
+    original_meta: Record<string, unknown> | null;
     created_at: string;
     channels: ChannelMini | null;
   };
   const p = pair as PairFull;
+  const resultMeta = (p.original_meta?.result ?? null) as
+    | { title?: string; description?: string; tags?: string[] }
+    | null;
   if (p.channels && p.channels.owner_id !== user.id) notFound();
 
   const { data: jobs } = await supabase
@@ -70,16 +58,7 @@ export default async function PairDetailPage({
     .select("id, stage, status, attempt, started_at, finished_at, error_message")
     .eq("pair_id", id)
     .order("started_at", { ascending: true });
-  type JobRow = {
-    id: string;
-    stage: string;
-    status: string;
-    attempt: number;
-    started_at: string | null;
-    finished_at: string | null;
-    error_message: string | null;
-  };
-  const jobList = (jobs ?? []) as JobRow[];
+  const jobList = (jobs ?? []) as StageJob[];
 
   const { data: logs } = await supabase
     .from("agent_logs")
@@ -101,11 +80,14 @@ export default async function PairDetailPage({
   return (
     <div className="space-y-6 max-w-4xl">
       <AutoRefresh status={p.status} />
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <h1 className="text-2xl font-bold">영상 페어</h1>
-        <Link href="/dashboard/pairs" className={buttonVariants({ variant: "outline", size: "sm" })}>
-          ← 목록
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard/pairs" className={buttonVariants({ variant: "outline", size: "sm" })}>
+            ← 목록
+          </Link>
+          <DeleteButton pairId={p.id} />
+        </div>
       </div>
 
       <section className="space-y-3">
@@ -115,6 +97,11 @@ export default async function PairDetailPage({
         </div>
         <OutputPlayer pairId={p.id} status={p.status} />
         <ReviewActions pairId={p.id} status={p.status} />
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="font-semibold text-sm">업로드 메타</h2>
+        <MetaEditor pairId={p.id} initial={resultMeta} />
       </section>
 
       <section className="rounded-md border p-4 space-y-2 text-sm" style={{ borderColor: "var(--border)" }}>
@@ -160,39 +147,7 @@ export default async function PairDetailPage({
 
       <section className="space-y-2">
         <h2 className="font-semibold text-sm">변환 단계</h2>
-        {jobList.length === 0 ? (
-          <p className="text-xs" style={{ color: "var(--muted)" }}>
-            아직 변환 작업이 시작되지 않았습니다 (워커 대기 중).
-          </p>
-        ) : (
-          <ul className="divide-y rounded-md border" style={{ borderColor: "var(--border)" }}>
-            {jobList.map((j) => (
-              <li key={j.id} className="p-3 flex items-center gap-3 text-sm">
-                <span className="font-medium w-24">{STAGE_LABEL[j.stage] ?? j.stage}</span>
-                <span
-                  className={`text-xs rounded px-2 py-0.5 ${JOB_STATUS_CLS[j.status] ?? "bg-neutral-100"}`}
-                >
-                  {j.status}
-                </span>
-                {j.attempt > 1 && (
-                  <span className="text-xs" style={{ color: "var(--muted)" }}>
-                    시도 {j.attempt}
-                  </span>
-                )}
-                <span className="text-xs ml-auto" style={{ color: "var(--muted)" }}>
-                  {j.finished_at
-                    ? new Date(j.finished_at).toLocaleTimeString("ko-KR")
-                    : j.started_at
-                      ? `시작 ${new Date(j.started_at).toLocaleTimeString("ko-KR")}`
-                      : "—"}
-                </span>
-                {j.error_message && (
-                  <p className="basis-full text-xs text-red-600 break-words">{j.error_message}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+        <StageList jobs={jobList} />
       </section>
 
       <section className="space-y-2">
