@@ -4,7 +4,7 @@
 > 대표님 1인 운영 기준 단일 파일. 페이즈 단위 ## 헤더 분리.
 > 작업 후 `[ ]` → `[x]` 체크. 새 작업은 적절한 페이즈에 추가.
 
-**진행률: 23 / 117**  ✅23 / 🔄94  *(Phase 1 베이스 PASS, next 16.2.4 패치, license_source DB 반영)*
+**진행률: 30 / 121**  ✅30 / 🔄91  *(MCP 연결 + Vercel 배포 + 빌드 hotfix + Supabase 마이그 6건 적용, 대표님 env/URL + storage 정책 Dashboard 적용 대기)*
 
 | 표기 | 의미 |
 |---|---|
@@ -47,8 +47,15 @@
 - [x] 〔db-guard-team〕 Storage 버킷 4개 + RLS 본문 — 2026-05-06 `0004_storage_buckets.sql`
 - [x] 〔db-guard-team〕 `channels.slug` immutable + INSERT CHECK 정규식 — 2026-05-06
 - [x] 〔db-guard-team〕 `handle_new_user()` search_path 코드 + EXCEPTION 흡수 — 2026-05-06
-- [ ] 🔴 〔대표님〕 마이그 적용 — `npx supabase login && npx supabase link --project-ref wbcgkevlinenkxpogfdf && npx supabase db push`
-- [ ] 〔dev-team〕 `.env*` / `.mcp.json` `.gitignore` + pre-commit gitleaks (§18.2)
+- [x] 🔴 〔부장+supabase-mcp〕 마이그 적용 — Supabase MCP `apply_migration` 으로 `0001~0005` + `0006_advisor_fixes` 6건 원격 적용 — 2026-05-06
+- [x] 〔db-guard-team〕 `0006_advisor_fixes` — handle_new_user RPC REVOKE / FK 인덱스 8건 / RLS 15건 `(select auth.uid())` 패턴 — 2026-05-06 advisor WARN 26→1 (남은 1건 `is_paid` RPC는 의도된 GRANT)
+- [ ] 🔴 〔대표님〕 `0007_storage_policies_manual.sql` — Supabase Dashboard SQL Editor 에서 수동 실행 (MCP 권한 거부: must be owner of relation objects)
+- [x] 〔dev-team〕 `.env*` / `.mcp.json` `.gitignore` 처리 — 2026-05-06 (gitleaks pre-commit 미적용)
+- [x] 〔부장〕 `.mcp.json` Supabase MCP 호스티드 연결 (project_ref + read_only=false + features 7개) — 2026-05-06
+- [x] 〔dev-team〕 Vercel 배포 — `https://testtest-eight-ashy.vercel.app` — 2026-05-06
+- [x] 🔴 〔부장〕 Vercel 빌드 hotfix — `env.ts` lazy Proxy + `(dashboard) force-dynamic` (NEXT_PHASE 빌드 시 검증 스킵) — 2026-05-06 commit 9eb6b7c
+- [ ] 🔴 〔대표님〕 Vercel env 등록 (`NEXT_PUBLIC_SUPABASE_*` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPERADMIN_EMAIL` / `NEXT_PUBLIC_ALLOW_TEST_LOGIN=false`) — 런타임 차단 해제
+- [ ] 🔴 〔대표님〕 Supabase URL Configuration (Site URL = Vercel · Redirect URLs = Vercel/** + localhost/**) — Auth flow 차단 해제 (진행 중)
 - [ ] 〔consultant 권고〕 채널마다 별도 Gmail + 별도 GCP 프로젝트 (blast radius, §13.1)
 - [ ] 🟡 〔consultant 권고〕 `license_source` 1차 출시: **CC + self_filmed만 허용** (§15)
 - [ ] 〔verifier-team〕 Phase 1 검증

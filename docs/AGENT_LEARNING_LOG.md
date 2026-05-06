@@ -47,4 +47,19 @@
 - **부장 자율 진행 모드의 한계**: 외부 의존 작업 (대표님 키 발급 / 콘솔 셋업 / 마이그 push) 은 부장이 못 함. 대기 큐로 명확히 보고.
 - **`npm audit fix --force` 금지 (Next.js)**: `npm audit` 가 next 의 transitive `postcss <8.5.10` (GHSA-qx2v-qp2m-jg93) 를 잡지만, `--force` 는 `next@9.3.3` 으로 다운그레이드 시도 → 절대 금지. Next.js 빌드 시점 CSS 처리만 사용 → 실제 공격면 없음. **다음 next minor patch 대기** 가 정답.
 
+- **`env.ts` 모듈 top-level fail-fast = Vercel 빌드 차단**:
+  - `export const env = readEnv()` 패턴은 import 시점 즉시 실행 → Vercel page data collection 단계에 env 미주입 시 throw → 빌드 실패.
+  - 정답 패턴: **lazy Proxy** + `process.env.NEXT_PHASE === 'phase-production-build'` 시 검증 스킵. 첫 속성 접근 시점에만 검증.
+  - 동시에 RSC 정적 prerender도 막아야 함 → 보호 라우트 layout/page에 `export const dynamic = "force-dynamic"` 명시. `(dashboard)/layout.tsx` 에 추가하면 자식 페이지 자동 전파.
+  - Vercel env 등록은 별도 (런타임 차단 해제용). 빌드 통과 ≠ 런타임 동작.
+
+- **Supabase MCP 호스티드 연결 패턴**:
+  - npm 설치 불필요. `https://mcp.supabase.com/mcp?project_ref=<ref>&read_only=false&features=...` URL만.
+  - `project_ref` 명시 = account-level 도구 자동 차단 (보안).
+  - `read_only=false` 는 마이그 적용/dev 단계만 — 운영 진입 전 `true` 변경.
+  - `features=database,docs,debugging,development,functions,storage` (branching은 Pro 필요).
+  - Claude Code 재시작 시 OAuth 자동 프롬프트.
+
+- **Supabase Site URL은 wildcard 불가**: production URL 1개만. 운영 + 로컬 동시 지원은 **Redirect URLs allow list 에 둘 다 등록** (와일드카드 `/**` 사용). 코드의 `${window.location.origin}/auth/callback` 가 자동으로 현재 도메인 사용.
+
 ---
