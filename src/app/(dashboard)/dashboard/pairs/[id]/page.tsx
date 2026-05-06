@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { OutputPlayer } from "./_components/output-player";
 import { AutoRefresh } from "./_components/auto-refresh";
+import { RetryButton } from "./_components/retry-button";
 
 export const dynamic = "force-dynamic";
 
@@ -107,7 +108,10 @@ export default async function PairDetailPage({
       </div>
 
       <section className="space-y-2">
-        <h2 className="font-semibold text-sm">결과 영상</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-sm">결과 영상</h2>
+          <RetryButton pairId={p.id} status={p.status} />
+        </div>
         <OutputPlayer pairId={p.id} status={p.status} />
       </section>
 

@@ -44,6 +44,8 @@ export default async function DashboardLayout({
         </div>
         <NavLink href="/dashboard">홈</NavLink>
         <NavLink href="/dashboard/channels">채널</NavLink>
+        <NavLink href="/dashboard/pairs">영상</NavLink>
+        <NavLink href="/dashboard/analytics">분석</NavLink>
         <NavLink href="/dashboard/billing">결제</NavLink>
         <div className="mt-auto pt-4 text-xs break-all" style={{ color: "var(--muted)" }}>
           {user?.email ?? "anonymous"}

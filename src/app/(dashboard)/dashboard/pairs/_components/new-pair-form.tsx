@@ -17,6 +17,9 @@ export function NewPairForm({
   const [originalUrl, setOriginalUrl] = useState("");
   const [licenseSource, setLicenseSource] = useState<"cc" | "self_filmed">("cc");
   const [licenseEvidenceUrl, setLicenseEvidenceUrl] = useState("");
+  const [startMin, setStartMin] = useState("0");
+  const [startSec, setStartSec] = useState("0");
+  const [duration, setDuration] = useState("59");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +44,16 @@ export function NewPairForm({
       setError("라이선스 증거 URL 필수");
       return;
     }
+    const startSeconds = parseInt(startMin || "0", 10) * 60 + parseInt(startSec || "0", 10);
+    const dur = parseInt(duration || "59", 10);
+    if (isNaN(startSeconds) || startSeconds < 0) {
+      setError("시작 시간은 0 이상");
+      return;
+    }
+    if (isNaN(dur) || dur < 5 || dur > 180) {
+      setError("길이는 5 ~ 180초");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -53,6 +66,8 @@ export function NewPairForm({
           original_url: originalUrl || undefined,
           license_source: licenseSource,
           license_evidence_url: licenseEvidenceUrl,
+          start_seconds: startSeconds,
+          duration: dur,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -60,6 +75,9 @@ export function NewPairForm({
       setKoreanUrl("");
       setOriginalUrl("");
       setLicenseEvidenceUrl("");
+      setStartMin("0");
+      setStartSec("0");
+      setDuration("59");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -149,6 +167,49 @@ export function NewPairForm({
             self_filmed (직접 촬영)
           </label>
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs" style={{ color: "var(--muted)" }}>
+          원본 시작 시간 + 길이 <span className="text-red-600">*</span> (원본 영상에서 자를 구간)
+        </label>
+        <div className="flex gap-2 items-center text-sm">
+          <input
+            type="number"
+            min="0"
+            value={startMin}
+            onChange={(e) => setStartMin(e.target.value)}
+            className="w-16 rounded border px-2 py-1 bg-transparent text-center"
+            style={{ borderColor: "var(--border)" }}
+            placeholder="분"
+          />
+          <span style={{ color: "var(--muted)" }}>분</span>
+          <input
+            type="number"
+            min="0"
+            max="59"
+            value={startSec}
+            onChange={(e) => setStartSec(e.target.value)}
+            className="w-16 rounded border px-2 py-1 bg-transparent text-center"
+            style={{ borderColor: "var(--border)" }}
+            placeholder="초"
+          />
+          <span style={{ color: "var(--muted)" }}>초</span>
+          <span className="ml-2" style={{ color: "var(--muted)" }}>부터</span>
+          <input
+            type="number"
+            min="5"
+            max="180"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            className="w-20 rounded border px-2 py-1 bg-transparent text-center"
+            style={{ borderColor: "var(--border)" }}
+          />
+          <span style={{ color: "var(--muted)" }}>초간</span>
+        </div>
+        <p className="text-[10px]" style={{ color: "var(--muted)" }}>
+          원본 영상의 어느 부분이 한국 숏츠와 매칭되는지. 예: 3분 33초부터 59초간
+        </p>
       </div>
 
       <div className="space-y-1">

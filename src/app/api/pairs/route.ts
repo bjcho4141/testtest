@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
     original_url?: string;
     license_source?: string;
     license_evidence_url?: string;
+    start_seconds?: number;
+    duration?: number;
   };
   try {
     body = await request.json();
@@ -70,6 +72,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "license_evidence_url 필수" }, { status: 400 });
   }
 
+  const startSeconds = typeof body.start_seconds === "number" ? body.start_seconds : 0;
+  const duration = typeof body.duration === "number" ? body.duration : 59;
+  if (startSeconds < 0 || duration < 5 || duration > 180) {
+    return NextResponse.json({ error: "start_seconds≥0, duration 5~180" }, { status: 400 });
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -95,6 +103,7 @@ export async function POST(request: NextRequest) {
       original_url: originalUrl,
       license_source: licenseSource,
       license_evidence_url: licenseEvidenceUrl,
+      original_meta: { start_seconds: startSeconds, duration },
       created_by: user.id,
       status: "pending",
       transformation_count: 0,
