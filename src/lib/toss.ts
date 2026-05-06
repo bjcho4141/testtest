@@ -54,3 +54,85 @@ export async function confirmTossPayment(input: {
 
 export const SUBSCRIPTION_AMOUNT_KRW = 9900;
 export const SUBSCRIPTION_NAME = "utube-shorts-jp 월 구독";
+
+function authHeader(): string {
+  const secret = process.env.TOSS_SECRET_KEY;
+  if (!secret) throw new Error("TOSS_SECRET_KEY missing");
+  return `Basic ${Buffer.from(`${secret}:`).toString("base64")}`;
+}
+
+export type TossBillingIssueResponse = {
+  mId: string;
+  customerKey: string;
+  authenticatedAt: string;
+  method: string;
+  billingKey: string;
+  cardCompany?: string;
+  cardNumber?: string; // 마스킹된 카드번호
+  card?: { company?: string; number?: string };
+  [k: string]: unknown;
+};
+
+export async function issueTossBillingKey(input: {
+  authKey: string;
+  customerKey: string;
+}): Promise<TossBillingIssueResponse> {
+  const res = await fetch(`${TOSS_API}/v1/billing/authorizations/issue`, {
+    method: "POST",
+    headers: {
+      Authorization: authHeader(),
+      "Content-Type": "application/json",
+      "Idempotency-Key": `billing:${input.customerKey}:${input.authKey}`,
+    },
+    body: JSON.stringify(input),
+  });
+  const data = (await res.json()) as TossBillingIssueResponse & {
+    code?: string;
+    message?: string;
+  };
+  if (!res.ok) {
+    throw new Error(
+      `Toss billing issue failed: ${res.status} ${data.code ?? "?"} ${data.message ?? ""}`,
+    );
+  }
+  return data;
+}
+
+export type TossBillingChargeResponse = TossConfirmResponse & {
+  card?: { company?: string; number?: string };
+};
+
+export async function chargeWithBillingKey(input: {
+  billingKey: string;
+  customerKey: string;
+  orderId: string;
+  amount: number;
+  orderName?: string;
+  customerEmail?: string;
+}): Promise<TossBillingChargeResponse> {
+  const res = await fetch(`${TOSS_API}/v1/billing/${input.billingKey}`, {
+    method: "POST",
+    headers: {
+      Authorization: authHeader(),
+      "Content-Type": "application/json",
+      "Idempotency-Key": `charge:${input.orderId}`,
+    },
+    body: JSON.stringify({
+      customerKey: input.customerKey,
+      orderId: input.orderId,
+      amount: input.amount,
+      orderName: input.orderName ?? SUBSCRIPTION_NAME,
+      ...(input.customerEmail ? { customerEmail: input.customerEmail } : {}),
+    }),
+  });
+  const data = (await res.json()) as TossBillingChargeResponse & {
+    code?: string;
+    message?: string;
+  };
+  if (!res.ok) {
+    throw new Error(
+      `Toss billing charge failed: ${res.status} ${data.code ?? "?"} ${data.message ?? ""}`,
+    );
+  }
+  return data;
+}
