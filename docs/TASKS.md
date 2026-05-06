@@ -4,7 +4,7 @@
 > 대표님 1인 운영 기준 단일 파일. 페이즈 단위 ## 헤더 분리.
 > 작업 후 `[ ]` → `[x]` 체크. 새 작업은 적절한 페이즈에 추가.
 
-**진행률: 3 / 92**  ✅3 / 🔄89
+**진행률: 23 / 117**  ✅23 / 🔄94  *(Phase 1 베이스 PASS, next 16.2.4 패치, license_source DB 반영)*
 
 | 표기 | 의미 |
 |---|---|
@@ -20,29 +20,34 @@
 > 별도 디렉토리 `/Users/cho/Desktop/4141/poc-jp` — utube-start 포크 전 작업
 > **킬 스위치**: 1개라도 미해결 → Phase 1 진입 보류
 
-- [ ] 〔dev-team〕 별도 디렉토리 `/Users/cho/Desktop/4141/poc-jp` 생성 (§14)
-- [ ] 〔voice-team〕 Demucs 음성 분리 SNR 게이트 임계값 측정 — 한국 숏츠 10편 (§14)
-- [ ] 〔edit-team〕 9:16 주체 트래킹 — 가로영상 5편 변환 → 정확도 측정 (§14)
-- [ ] 〔edit-team〕 ASS 자막 한·일 폰트 (Noto Sans CJK / M PLUS 1p) 글리프 호환 (§14)
-- [ ] 🟡 〔voice-team〕 ElevenLabs 일본어 voice 후보 1~3개 비교 시청·선정 (§15)
-- [ ] 〔edit-team〕 FFmpeg 8.1 subtitles + 9:16 + amix 1편 end-to-end (§14)
-- [ ] 〔부장〕 PoC 결과 검토 → Phase 1 진입 결정 (킬 스위치)
+- [x] 〔architect-team〕 별도 디렉토리 `/Users/cho/Desktop/4141/poc-jp` 생성 + 14파일 골격 (§14) — 2026-05-06
+- [ ] 〔voice-team〕 Demucs 음성 분리 SNR 게이트 — 한국 숏츠 10편 / **합격: vocals SNR ≥ 6dB AND 잔존 ≤ -3dB, 8/10편** (§14, qa 권고)
+- [ ] 〔edit-team〕 9:16 주체 트래킹 — 가로영상 5편 / **합격: IoU ≥ 0.7 프레임 ≥ 90%, 4/5편** (§14, qa 권고)
+- [ ] 〔edit-team〕 ASS 자막 한·일 폰트 (Noto Sans CJK / M PLUS 1p) / **합격: 상용한자 2,136 + KS X 1001 2,350 누락 0** (§14, qa 권고)
+- [ ] 🟡 〔voice-team〕 ElevenLabs 일본어 voice 1~3개 / **합격: 5점 척도 평균 ≥ 4.0, 일본 거주 친구 블라인드** (§15, qa 권고)
+- [ ] 〔edit-team〕 FFmpeg 8.1 E2E 1편 / **합격: 1080×1920 / CRF≤18 / ≤7분 / 자막 sync ±100ms** (§14, qa 권고)
+- [x] 🔴 〔research-team〕 9:16 트래커 도구 결정 — **MediaPipe Selfie Seg 채택** (Apache 2.0, AGPL 회피) — 2026-05-06
+  - 1순위 YOLOv8n MPS는 AGPL-3.0 SaaS 배포 시 전체 소스 공개 의무 → 회피
+  - 2순위 MediaPipe Apache 2.0 — 인물 중심 일본 콘텐츠에 적합
+- [ ] 〔dev-team〕 PoC scripts/01~05 실제 구현 (API 키 발급 후) — 골격은 완료
+- [ ] 〔부장〕 PoC 6항목 합산 GO/NO-GO — `99-poc-report.ts` 실행 → Phase 1 진입 결정
 
 ---
 
 ## Phase 1 — 베이스 구축
 
-- [ ] 〔architect-team〕 utube-start → utube-shorts-jp 포크 (§14 P1)
-- [ ] 〔dev-team〕 불필요 모듈 제거 (이미지팀·썸네일·CHARACTER_SHEET·대본팀)
-- [ ] 〔dev-team〕 Next.js 16 업그레이드 + Tailwind v4 확인
-- [ ] 🔴 〔dev-team〕 Supabase 프로젝트 생성 + **Pro 플랜 전환** (§13.2 — Free 1GB 첫주 폭발)
-- [ ] 〔db-guard-team〕 마이그레이션 — 14개 테이블 (profiles/channels/shorts_pairs/conversion_jobs/bgm_recommendations/trending_sounds/agent_logs/uploads/channel_credentials/payments/billing_keys/subscriptions/refunds/cost_ledger) (§3.2 + §3.2.1)
-- [ ] 〔db-guard-team〕 인덱스 생성 — `shorts_pairs(channel_id,status)`, `(status,created_at)`, `conversion_jobs(pair_id,stage,attempt) UNIQUE`, `uploads(content_id_status) WHERE pending`, `profiles(paid_until)`, `payments(user_id,created_at)`, `subscriptions(next_charge_at) WHERE active`, `cost_ledger(pair_id)` (§3.2)
-- [ ] 〔db-guard-team〕 `is_paid()` 헬퍼 함수 + 모든 RLS 정책에 AND 결합 (§3.2)
-- [ ] 〔db-guard-team〕 RLS 정책 본문 적용 — channels/shorts_pairs/conversion_jobs/agent_logs/uploads + 결제 5테이블 (§3.3)
-- [ ] 〔db-guard-team〕 Storage 버킷 4개 + RLS 본문 (§3.5.1)
-- [ ] 〔db-guard-team〕 `channels.slug` immutable 트리거 (§3.5.1)
-- [ ] 〔db-guard-team〕 `handle_new_user()` `search_path = public, pg_temp` + `EXCEPTION WHEN unique_violation` (§3.4)
+- [x] 〔dev-team〕 Phase 1 Next.js 16 베이스 셋업 — 22 파일 (proxy.ts·@supabase/ssr·shadcn) — 2026-05-06
+- [x] 〔dev-team〕 불필요 모듈 — testtest는 백지 시작이라 N/A
+- [x] 〔dev-team〕 Next.js 16.2.2 + Tailwind v4 — 2026-05-06 build PASS
+- [ ] 🔴 〔대표님〕 Supabase 프로젝트 + **Pro 플랜 전환** (키 발급 ✅ / Pro 전환 미확인 — 콘솔에서 확인 필요)
+- [x] 〔db-guard-team〕 마이그레이션 — 15개 테이블 (+webhook_events, 결함 6+보강 4+사업 5 모두 반영) — 2026-05-06 `supabase/migrations/0001~0005`
+- [x] 〔db-guard-team〕 인덱스 (uploads(pair_id) 신규 추가, next_charge_at asc 부분 인덱스 보강) — 2026-05-06
+- [x] 〔db-guard-team〕 `is_paid()` `security definer set search_path` 명시 — 2026-05-06 `0002_functions_triggers.sql`
+- [x] 〔db-guard-team〕 RLS 정책 본문 — 4테이블 AND 결합 누락분 작성 — 2026-05-06 `0003_rls_policies.sql`
+- [x] 〔db-guard-team〕 Storage 버킷 4개 + RLS 본문 — 2026-05-06 `0004_storage_buckets.sql`
+- [x] 〔db-guard-team〕 `channels.slug` immutable + INSERT CHECK 정규식 — 2026-05-06
+- [x] 〔db-guard-team〕 `handle_new_user()` search_path 코드 + EXCEPTION 흡수 — 2026-05-06
+- [ ] 🔴 〔대표님〕 마이그 적용 — `npx supabase login && npx supabase link --project-ref wbcgkevlinenkxpogfdf && npx supabase db push`
 - [ ] 〔dev-team〕 `.env*` / `.mcp.json` `.gitignore` + pre-commit gitleaks (§18.2)
 - [ ] 〔consultant 권고〕 채널마다 별도 Gmail + 별도 GCP 프로젝트 (blast radius, §13.1)
 - [ ] 🟡 〔consultant 권고〕 `license_source` 1차 출시: **CC + self_filmed만 허용** (§15)
@@ -221,8 +226,65 @@
 
 ---
 
+## 🆕 5팀 검토 권고 (2026-05-06 — PRD 패치 필요)
+
+> architect / db-guard / security / qa / consultant 5팀 PRD 최종 점검 결과.
+> 각 항목은 PRD 본문 패치 + 해당 Phase 태스크에 흡수 필요.
+
+### A. architect-team — 시스템 구조 (3건)
+
+- [ ] 🔴 〔architect-team〕 SPOF 페일오버 SOP §13.2 보강 (Mac 1대 다운 시 RTO/RPO 명시) — Phase 5 전 필수
+- [ ] 🔴 〔architect-team〕 stage별 `input_hash` 명세 + 캐시 lookup 규칙 §5.2 — Phase 4 착수 전 필수
+- [ ] 〔db-guard-team〕 `worker_sessions` 신규 테이블 (worker_id PK, channel_id, last_heartbeat, current_pair_id, current_stage) — Phase 6
+- [ ] 〔dev-team〕 Vercel + Supabase 리전 통일 `ap-northeast-1` (Tokyo) — Phase 1
+- [ ] 〔dev-team〕 OAuth refresh token 90일 회전 cron — Phase 5
+
+### B. db-guard-team — DB 결함 (Phase 0 전 패치 권고)
+
+- [ ] 🔴 〔db-guard-team〕 `is_paid()` `SECURITY DEFINER set search_path = public, pg_temp` 명시
+- [ ] 🔴 〔db-guard-team〕 `uploads(pair_id)` 인덱스 추가 (RLS join 풀스캔 방지)
+- [ ] 🔴 〔db-guard-team〕 RLS `is_paid()` AND-결합 본문 SQL 4테이블 (conversion_jobs/bgm_recommendations/agent_logs/uploads) 작성
+- [ ] 🔴 〔db-guard-team〕 `conversion_jobs(pair_id, stage, attempt) UNIQUE` race — `INSERT ... ON CONFLICT DO NOTHING RETURNING` 패턴 명시
+- [ ] 🔴 〔db-guard-team〕 `cost_ledger.pair_id on delete set null` + `pair_id_snapshot uuid not null` (KPI 회계 무결성)
+- [ ] 〔db-guard-team〕 `channels.slug` INSERT CHECK `(slug ~ '^[a-z0-9-]+$' and length 2~40)`
+- [ ] 〔db-guard-team〕 `profiles.active_subscription_id` `references subscriptions(id) deferrable initially deferred` 명시
+
+### C. security-team — 신규 [FAIL] + [POLICY] (Phase 2 전 차단)
+
+- [ ] 🔴 〔dev-team〕 F-4: `next.config.ts` 빌드 가드 + **런타임 가드 이중화** (`/api/auth/test-login` 첫 줄에서 `VERCEL_ENV !== production && NODE_ENV !== production` 동시 체크)
+- [ ] 🔴 〔dev-team〕 F-5: `refunds.cancel_amount` 검증 (음수 방지 CHECK + `cancel_amount + 누적 ≤ amount` 서버 SQL `FOR UPDATE`)
+- [ ] 🔴 〔dev-team〕 Webhook 멱등성 — `webhook_events(payment_key, status) ON CONFLICT DO NOTHING RETURNING` atomic dedup
+- [ ] 🔴 〔db-guard-team〕 `handle_new_user()` 본문에 `SET search_path = public, pg_temp` 코드 추가 (주석만 있음)
+- [ ] 〔dev-team〕 PKCE 강제 (`flowType: 'pkce'`) Supabase Auth 옵션
+- [ ] 〔doc-sync-team〕 약관 패치 — TERMS §3 변경 통지 7일 → 30일 / REFUND §17조2항 부합 / PRIVACY §4 국외이전 동의 (Anthropic/OpenAI/ElevenLabs) / TERMS §10 통신판매업 신고
+- [ ] 〔dev-team〕 CLI `CLI_SHARED_SECRET` 로테이션 절차 (이중 키 허용 기간) §18 추가
+- [ ] 〔dev-team〕 `agent_logs` PII sanitization (카카오 닉네임·email·IP 마스킹)
+
+### D. qa-team — Phase 0 진입 차단 (임계값은 위 Phase 0 섹션에 흡수)
+
+- [ ] 🔴 〔dev-team〕 `shorts_pairs.warnings jsonb` 컬럼 추가 (다운로드차단·STT실패·SNR미달·TTS충돌·9:16 bypass 사용자 노출)
+- [ ] 🔴 〔dev-team〕 `/dashboard/upload` 9항 체크리스트 — 각 체크별 1줄 정의 + 예시 영상 링크 + 첫 30편 부장 2차 검토 (이중 게이트)
+- [ ] 🔴 〔dev-team〕 `/dashboard/chat` 채널 dropdown + agent 색상 + Realtime 끊김 시 5초 polling 폴백
+- [ ] 〔dev-team〕 30초 타이머 — 미만 통과 시 경고 모달 + `agent_logs` 검수 소요시간 기록
+- [ ] 〔dev-team〕 `/dashboard/billing` past_due 7일 카운트다운 배너 + 3D 인증 실패 재진입 동선
+- [ ] 〔dev-team〕 모바일 반응형 우선 (`/dashboard/upload` BGM 카드) — Tailwind v4 breakpoint 명시
+
+### E. consultant — 사업 모델 결정 (🟡 대표님 판단 필수)
+
+- [x] 1차 타겟 결정 — **한국 거주 일본어 운영자 only** ✅ 부장 자율결정 2026-05-06
+- [x] license_source 1차 출시 — **CC + self_filmed만** ✅ 부장 자율결정 2026-05-06
+- [x] transformation 강제 — **6개 강제 (해설 voice over 추가)** ✅ 부장 자율결정 2026-05-06
+- [x] 검수 인력 — **AI(Gemini) 1차 + 친구 + 백업 외주 1명** ✅ 부장 자율결정 2026-05-06
+- [x] Phase 0 범위 — **1채널 30편/주** (4채널은 Phase 3) ✅ 부장 자율결정 2026-05-06
+- [ ] 〔consultant〕 ElevenLabs 상업 라이선스 — BYOK 모델 검토 (사용자 자기 키 입력)
+- [ ] 〔dev-team〕 빨간딱지 — 정규식 + **임베딩 유사도 (text-embedding-3-small) 병행** (정규식만은 우회 쉬움)
+- [ ] 〔dev-team〕 가짜뉴스 키워드 score 누적 (3개 이상 = 블록) — strict block은 false positive
+
+---
+
 ## 변경 이력
 
 | 날짜 | 변경 |
 |---|---|
 | 2026-05-06 | PRD §14 + 5팀 권고 + §16 결제 + §18 보안 통합 추출. 92개 태스크 |
+| 2026-05-06 | 5팀 PRD 최종 점검 (architect/db/security/qa/consultant) → 신규 25개 추가 (총 117). PoC 디렉토리 골격 14파일 완성 (`/Users/cho/Desktop/4141/poc-jp`). |

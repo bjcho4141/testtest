@@ -49,3 +49,6 @@ yarn-error.log*
 .cache/
 coverage/
 *.tsbuildinfo
+
+# Supabase 임시 파일
+/supabase/.temp/
