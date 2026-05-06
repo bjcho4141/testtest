@@ -52,3 +52,4 @@ coverage/
 
 # Supabase 임시 파일
 /supabase/.temp/
+.vercel
