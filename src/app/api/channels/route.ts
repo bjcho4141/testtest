@@ -7,11 +7,12 @@
  * RLS: own channels select/insert (is_paid 게이트)
  */
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const SLUG_MIN = 2;
 const SLUG_MAX = 40;
+const FREE_CHANNEL_LIMIT = 1;
 
 export async function GET() {
   const supabase = await createClient();
@@ -61,7 +62,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
+  const admin = createAdminClient();
+
+  // 무료 정책: 미결제 사용자는 첫 1개 채널만 등록 가능
+  const { data: paidGate } = await admin.rpc("is_paid", { uid: user.id } as never);
+  const isPaid = Boolean(paidGate);
+  if (!isPaid) {
+    const { count } = await admin
+      .from("channels")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", user.id);
+    const used = count ?? 0;
+    if (used >= FREE_CHANNEL_LIMIT) {
+      return NextResponse.json(
+        { error: `무료 ${FREE_CHANNEL_LIMIT}개 채널 모두 사용함 — 결제 후 무제한`, billingRequired: true },
+        { status: 402 },
+      );
+    }
+  }
+
+  const { data, error } = await admin
     .from("channels")
     .insert({ owner_id: user.id, name, slug, description } as never)
     .select("id, name, slug")

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Footer } from "../_components/footer";
+import { NavLink } from "./_components/nav-link";
 
 // 인증 / 결제 게이트 동적 페이지 — 정적 prerender 회피
 export const dynamic = "force-dynamic";
@@ -60,13 +60,3 @@ export default async function DashboardLayout({
   );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="text-sm px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800"
-    >
-      {children}
-    </Link>
-  );
-}

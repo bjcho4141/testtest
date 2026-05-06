@@ -7,12 +7,14 @@
  *   - 인증됐으나 is_paid=false → /dashboard/billing?from=blocked
  */
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createClient as createSbClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
 import type { Database } from "@/types/database";
 
 const PROTECTED_PREFIX = "/dashboard";
 const BILLING_PATH = "/dashboard/billing";
+const FREE_PAIR_LIMIT = 2;
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -78,6 +80,20 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (!paid) {
+      // 무료 2개 정책 — 미결제 사용자도 첫 2개 페어까지 사용 가능
+      // (RLS 가 paid 일 때만 SELECT 허용 → admin 키로 직접 카운트)
+      const admin = createSbClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false },
+      });
+      const { count } = await admin
+        .from("shorts_pairs")
+        .select("id", { count: "exact", head: true })
+        .eq("created_by", user.id);
+      const freeCount = count ?? 0;
+      if (freeCount < FREE_PAIR_LIMIT) {
+        // 통과 (미결제 + 무료 잔여 있음)
+        return response;
+      }
       const url = request.nextUrl.clone();
       url.pathname = BILLING_PATH;
       url.searchParams.set("from", "blocked");

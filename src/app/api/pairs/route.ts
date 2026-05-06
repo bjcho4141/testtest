@@ -5,10 +5,11 @@
  * INSERT 시 transformation_count=0 (분석 단계에서 >=6 강제)
  */
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 const ALLOWED_LICENSE = ["cc", "self_filmed"] as const;
 const URL_REGEX = /^https?:\/\/[^\s]+$/i;
+const FREE_PAIR_LIMIT = 2;
 
 export async function GET() {
   const supabase = await createClient();
@@ -84,18 +85,38 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  // 채널 소유 확인 (RLS 가 한 번 더 막지만 명시적 메시지)
-  const { data: ch } = await supabase
+  const admin = createAdminClient();
+
+  // 채널 소유 확인 (admin 우회 — RLS 무관)
+  const { data: ch } = await admin
     .from("channels")
-    .select("id")
+    .select("id, owner_id")
     .eq("id", channelId)
-    .eq("owner_id", user.id)
     .single();
-  if (!ch) {
+  type ChRow = { id: string; owner_id: string } | null;
+  const channel = ch as ChRow;
+  if (!channel || channel.owner_id !== user.id) {
     return NextResponse.json({ error: "채널 소유자 아님" }, { status: 403 });
   }
 
-  const { data, error } = await supabase
+  // 무료 정책: 미결제면 페어 카운트 < FREE_PAIR_LIMIT 일 때만 허용
+  const { data: paidGate } = await admin.rpc("is_paid", { uid: user.id } as never);
+  const isPaid = Boolean(paidGate);
+  if (!isPaid) {
+    const { count } = await admin
+      .from("shorts_pairs")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", user.id);
+    const used = count ?? 0;
+    if (used >= FREE_PAIR_LIMIT) {
+      return NextResponse.json(
+        { error: `무료 ${FREE_PAIR_LIMIT}개 모두 사용함 — 결제 후 무제한`, billingRequired: true },
+        { status: 402 },
+      );
+    }
+  }
+
+  const { data, error } = await admin
     .from("shorts_pairs")
     .insert({
       channel_id: channelId,

@@ -66,20 +66,41 @@ export default async function DashboardHomePage() {
 
   return (
     <div className="space-y-8 max-w-5xl">
-      {/* HERO — 미결제 시 결제 유도 */}
+      {/* HERO — 미결제 시 무료 잔여 + 결제 유도 */}
       {!isPaid && (
         <section className="rounded-xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 sm:p-8 space-y-3">
-          <div className="text-4xl">👋</div>
+          <div className="flex items-center gap-2">
+            <span className="text-3xl">🎁</span>
+            <span className="text-xs uppercase tracking-wider px-2 py-1 rounded bg-white/80 dark:bg-black/40 font-semibold">무료 체험</span>
+          </div>
           <h2 className="text-2xl font-bold">{user?.email?.split("@")[0]}님, 환영합니다</h2>
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            영상 변환 / 채널 관리 / 분석 등 모든 기능을 사용하려면 이용권이 필요합니다.
+          <p className="text-sm">
+            <strong>채널 1개 + 영상 2개 무료</strong>로 먼저 사용해보세요. 결제는 그 다음에 결정해도 됩니다.
           </p>
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Link href="/dashboard/billing?from=blocked" className={buttonVariants({ size: "lg" })}>
-              💳 이용권 결제하기
-            </Link>
-            <Link href="/dashboard/billing?plan=subscription" className={buttonVariants({ variant: "outline", size: "lg" })}>
-              🔄 월 정기결제 보기
+          <div className="flex flex-wrap gap-3 text-sm pt-1">
+            <span className="px-3 py-1 rounded-full bg-white/80 dark:bg-black/40 border" style={{ borderColor: "var(--border)" }}>
+              📺 채널 <strong>{Math.max(0, 1 - channelCount)}/1</strong> 남음
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white/80 dark:bg-black/40 border" style={{ borderColor: "var(--border)" }}>
+              🎬 영상 <strong>{Math.max(0, 2 - pairCount)}/2</strong> 남음
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-3">
+            {channelCount === 0 ? (
+              <Link href="/dashboard/channels" className={buttonVariants({ size: "lg" })}>
+                📺 첫 채널 만들기 (무료)
+              </Link>
+            ) : pairCount < 2 ? (
+              <Link href="/dashboard/pairs" className={buttonVariants({ size: "lg" })}>
+                🎬 무료 영상 만들기 ({Math.max(0, 2 - pairCount)}/2)
+              </Link>
+            ) : (
+              <Link href="/dashboard/billing?from=blocked" className={buttonVariants({ size: "lg" })}>
+                💳 결제하고 계속 만들기
+              </Link>
+            )}
+            <Link href="/dashboard/billing" className={buttonVariants({ variant: "outline", size: "lg" })}>
+              💳 결제 옵션 보기
             </Link>
           </div>
           <div className="grid sm:grid-cols-2 gap-3 pt-4 text-sm">
