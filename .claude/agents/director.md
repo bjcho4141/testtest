@@ -186,12 +186,17 @@ sqlite3 .harness/chat.db "INSERT INTO harness_messages (id, \"from\", \"to\", ty
 
 ---
 
-## 📐 프로젝트 컨텍스트 (init 시 채워짐)
+## 📐 프로젝트 컨텍스트
 
-- 위치: `/Users/cho/Desktop/4141/testtest` · 프레임워크: `Generic project` · DB: `none / not detected` · UI: `plain CSS`
-- 결제: `none` · 법적 컨텍스트: `(no special legal context — remove "Legal/terms" rows in director.md if not applicable)` (해당 시)
-- 태스크 트래커: `docs/TASKS_*.md` · Git push: `gh auth switch --user your-github-handle`
-- 상세 규약: 루트 `CLAUDE.md`
+- **프로젝트**: utube-shorts-jp (한국 숏츠 → 일본어 자동 현지화 SaaS)
+- **위치**: `/Users/cho/Desktop/4141/testtest` (베이스 포크 예정: `/Users/cho/Desktop/4141/utube-start`)
+- **프레임워크**: Next.js 16 App Router (Vercel 배포) · **DB**: Supabase Postgres + RLS · **UI**: Tailwind v4 + shadcn/ui
+- **인증**: Kakao OAuth (Supabase native) + 슈퍼어드민 테스트 로그인 (DEV 전용)
+- **결제**: 토스페이먼츠 (일반 ₩9,900/30일, 정기 ₩9,900/월)
+- **법적 컨텍스트**: 한국 B2C SaaS — `docs/TERMS.md` / `PRIVACY.md` / `REFUND.md` (변호사 검토 필요)
+- **태스크 트래커**: `docs/TASKS.md` (단일 파일 92개 태스크) · **PRD**: `docs/PRD.md` · **정책**: `docs/YOUTUBE_POLICY.md`
+- **Git**: `gh auth: bjcho4141` · remote: `https://github.com/bjcho4141/testtest`
+- **상세 규약**: 루트 `CLAUDE.md` + `docs/PRD.md`
 
 ---
 
