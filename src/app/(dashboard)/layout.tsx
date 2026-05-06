@@ -27,6 +27,8 @@ export default async function DashboardLayout({
         </div>
         <nav className="flex items-center gap-1">
           <NavLink href="/dashboard">홈</NavLink>
+          <NavLink href="/dashboard/channels">채널</NavLink>
+          <NavLink href="/dashboard/pairs">영상</NavLink>
           <NavLink href="/dashboard/billing">결제</NavLink>
         </nav>
       </header>
@@ -40,6 +42,7 @@ export default async function DashboardLayout({
           utube-shorts-jp
         </div>
         <NavLink href="/dashboard">홈</NavLink>
+        <NavLink href="/dashboard/channels">채널</NavLink>
         <NavLink href="/dashboard/billing">결제</NavLink>
         <div className="mt-auto pt-4 text-xs break-all" style={{ color: "var(--muted)" }}>
           {user?.email ?? "anonymous"}
