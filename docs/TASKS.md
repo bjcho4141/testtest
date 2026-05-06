@@ -4,7 +4,7 @@
 > 대표님 1인 운영 기준 단일 파일. 페이즈 단위 ## 헤더 분리.
 > 작업 후 `[ ]` → `[x]` 체크. 새 작업은 적절한 페이즈에 추가.
 
-**진행률: 30 / 121**  ✅30 / 🔄91  *(MCP 연결 + Vercel 배포 + 빌드 hotfix + Supabase 마이그 6건 적용, 대표님 env/URL + storage 정책 Dashboard 적용 대기)*
+**진행률: 41 / 122**  ✅41 / 🔄81  *(Phase 1 미들웨어/인증·결제 게이트 작동 + 토스 v2 풀 구현(단건/webhook/refund) + 모바일 반응형 + dashboard 결제 위젯, 카카오 OAuth Dashboard 설정 + Storage Policies UI 대기)*
 
 | 표기 | 의미 |
 |---|---|
@@ -67,8 +67,9 @@
 - [ ] 〔dev-team〕 Supabase Auth Kakao Provider 활성화 (§2.1)
 - [ ] 〔dev-team〕 카카오 개발자 콘솔 — 앱 + Redirect URI (`https://<ref>.supabase.co/auth/v1/callback`) + 동의항목 (§2.1)
 - [ ] 🟡 〔dev-team〕 카카오 비즈앱 전환 여부 결정 (이메일 필수 동의 필요 시)
-- [ ] 〔dev-team〕 `@supabase/ssr` 미들웨어 (서버/브라우저 클라이언트 분리) (§2.4)
-- [ ] 〔dev-team〕 미들웨어 결제 게이트 — `is_paid()` 체크 + `/dashboard/billing?from=blocked` 리다이렉트 (§2.4)
+- [x] 〔dev-team〕 `@supabase/ssr` 미들웨어 (서버/브라우저 클라이언트 분리) (§2.4) — 2026-05-06 `src/proxy.ts` (Next.js 16 정식 컨벤션)
+- [x] 〔dev-team〕 미들웨어 결제 게이트 — `is_paid()` 체크 + `/dashboard/billing?from=blocked` 리다이렉트 (§2.4) — 2026-05-06 `src/lib/supabase/proxy-helper.ts`
+- [x] 〔dev-team〕 슈퍼어드민 test-login (verifyOtp + token_hash 흐름) — 2026-05-06 GET → /dashboard 한방 통과 검증
 - [ ] 〔dev-team〕 로그인 모달 (카카오 + DEV 슈퍼어드민 버튼) (§2.2)
 - [ ] 🔴 〔dev-team〕 `/api/auth/test-login` (env 가드 + IP allowlist + 1시간 만료) (§2.1, §18.5)
 - [ ] 🔴 〔dev-team〕 `next.config.ts` production 빌드 가드 — `VERCEL_ENV='production'` + `NEXT_PUBLIC_ALLOW_TEST_LOGIN=true` 동시 시 빌드 실패 (§18.5)
@@ -189,9 +190,14 @@
 
 > `director.md`: 결제·정산 → `code-review-team` + `security-team` 필수.
 
-- [ ] 〔dev-team〕 토스 테스트 키 발급 — developers.tosspayments.com (§16.7)
+- [x] 〔dev-team〕 토스 테스트 키 발급 — docs v2 페어 (gck/gsk) Vercel Production+Preview 등록 — 2026-05-06
 - [ ] 〔dev-team〕 환경변수 등록 (`TOSS_CLIENT_KEY` / `TOSS_SECRET_KEY` / `TOSS_WEBHOOK_SECRET`)
-- [ ] 〔dev-team〕 일반결제 — TossPayments SDK + `requestPayment` + `/api/payments/confirm` + DB amount 위조 검증 (§16.2)
+- [x] 〔dev-team〕 일반결제 — `@tosspayments/tosspayments-sdk` v2 + `widgets.requestPayment` + `/api/payments/confirm` + amount 위변조 방지 (SUBSCRIPTION_AMOUNT_KRW 강제) (§16.2) — 2026-05-06
+- [x] 〔dev-team〕 결제 success/fail 페이지 — `/dashboard/billing/success` (confirm + payments INSERT + paid_until +1개월) / fail — 2026-05-06
+- [x] 〔dev-team〕 webhook handler — `/api/webhooks/toss` (HMAC SHA-256 + webhook_events 멱등성 + DONE/CANCELED 분기) (§16.7) — 2026-05-06
+- [x] 〔dev-team〕 환불 API — `/api/payments/refund` (본인 결제 검증 + 토스 cancel + refunds INSERT) (§16.5) — 2026-05-06
+- [x] 〔dev-team〕 dashboard 결제 상태 위젯 — paid_until / 최근 5건 결제 표시 — 2026-05-06
+- [ ] 〔대표님〕 토스 webhook secret — 도메인 등록 후 콘솔 발급 → `TOSS_WEBHOOK_SECRET` 등록 시 자동 활성
 - [ ] 〔dev-team〕 정기결제 — 빌링키 발급 + `customerKey` UUID + pgsodium 암호화 (§16.3)
 - [ ] 〔dev-team〕 자동결제 cron (Vercel Cron 또는 Supabase Edge Function — 매일 00:00 KST) (§16.3)
 - [ ] 〔dev-team〕 자동결제 실패 → `past_due` (3회) → `expired` (7일) (§13.3)
