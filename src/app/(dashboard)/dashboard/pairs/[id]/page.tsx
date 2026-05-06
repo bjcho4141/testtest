@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { OutputPlayer } from "./_components/output-player";
 import { AutoRefresh } from "./_components/auto-refresh";
 import { RetryButton } from "./_components/retry-button";
+import { ReviewActions } from "./_components/review-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -107,12 +108,13 @@ export default async function PairDetailPage({
         </Link>
       </div>
 
-      <section className="space-y-2">
-        <div className="flex items-center justify-between">
+      <section className="space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="font-semibold text-sm">결과 영상</h2>
           <RetryButton pairId={p.id} status={p.status} />
         </div>
         <OutputPlayer pairId={p.id} status={p.status} />
+        <ReviewActions pairId={p.id} status={p.status} />
       </section>
 
       <section className="rounded-md border p-4 space-y-2 text-sm" style={{ borderColor: "var(--border)" }}>

@@ -61,18 +61,36 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  await admin
+  const finishedAt = new Date().toISOString();
+
+  // 1차: running row UPDATE (claim 단계에서 INSERT 한 download 등)
+  const { count } = await admin
     .from("conversion_jobs")
     .update({
       status,
-      finished_at: new Date().toISOString(),
+      finished_at: finishedAt,
       error_message: error ?? null,
       artifact_path: artifactPath ?? null,
       metadata: metadata as never,
-    } as never)
+    } as never, { count: "exact" })
     .eq("pair_id", pairId)
     .eq("stage", stage)
     .eq("status", "running");
+
+  // 매칭 row 없으면 (워커가 stt 등을 직접 INSERT 안 함) 새로 INSERT
+  if ((count ?? 0) === 0) {
+    await admin.from("conversion_jobs").insert({
+      pair_id: pairId,
+      stage,
+      status,
+      attempt: 1,
+      started_at: finishedAt,
+      finished_at: finishedAt,
+      error_message: error ?? null,
+      artifact_path: artifactPath ?? null,
+      metadata: metadata as never,
+    } as never);
+  }
 
   if (finalStatus && (ALLOWED_FINAL as readonly string[]).includes(finalStatus)) {
     await admin
