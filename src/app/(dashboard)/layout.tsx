@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Footer } from "../_components/footer";
 
 // 인증 / 결제 게이트 동적 페이지 — 정적 prerender 회피
 export const dynamic = "force-dynamic";
@@ -45,7 +46,10 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      <section className="flex-1 p-4 md:p-8 min-w-0">{children}</section>
+      <section className="flex-1 p-4 md:p-8 min-w-0 flex flex-col">
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </section>
     </div>
   );
 }
