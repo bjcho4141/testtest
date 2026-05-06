@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { NewPairForm } from "./_components/new-pair-form";
@@ -76,40 +77,38 @@ export default async function PairsPage() {
                 cls: "bg-neutral-100",
               };
               return (
-                <li key={p.id} className="p-3 flex flex-col gap-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs rounded px-2 py-0.5 ${st.cls}`}>
-                      {st.ko}
-                    </span>
-                    <span className="text-xs uppercase" style={{ color: "var(--muted)" }}>
-                      {p.license_source}
-                    </span>
-                    <span className="text-xs" style={{ color: "var(--muted)" }}>
-                      {p.channels?.name ?? p.channel_id.slice(0, 8)}
-                    </span>
-                    <span className="text-xs ml-auto" style={{ color: "var(--muted)" }}>
-                      {new Date(p.created_at).toLocaleDateString("ko-KR")}
-                    </span>
-                  </div>
-                  <a
-                    href={p.korean_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-mono truncate underline"
+                <li key={p.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-900">
+                  <Link
+                    href={`/dashboard/pairs/${p.id}`}
+                    className="block p-3 flex flex-col gap-1"
                   >
-                    {p.korean_url}
-                  </a>
-                  {p.original_url && (
-                    <a
-                      href={p.original_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-mono truncate"
-                      style={{ color: "var(--muted)" }}
-                    >
-                      원본: {p.original_url}
-                    </a>
-                  )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs rounded px-2 py-0.5 ${st.cls}`}>
+                        {st.ko}
+                      </span>
+                      <span className="text-xs uppercase" style={{ color: "var(--muted)" }}>
+                        {p.license_source}
+                      </span>
+                      <span className="text-xs" style={{ color: "var(--muted)" }}>
+                        {p.channels?.name ?? p.channel_id.slice(0, 8)}
+                      </span>
+                      <span className="text-xs ml-auto" style={{ color: "var(--muted)" }}>
+                        {new Date(p.created_at).toLocaleDateString("ko-KR")}
+                      </span>
+                      <span className="text-xs" style={{ color: "var(--muted)" }}>→</span>
+                    </div>
+                    <span className="text-xs font-mono truncate underline">
+                      {p.korean_url}
+                    </span>
+                    {p.original_url && (
+                      <span
+                        className="text-xs font-mono truncate"
+                        style={{ color: "var(--muted)" }}
+                      >
+                        원본: {p.original_url}
+                      </span>
+                    )}
+                  </Link>
                 </li>
               );
             })}
