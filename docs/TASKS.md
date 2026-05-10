@@ -4,7 +4,7 @@
 > 대표님 1인 운영 기준 단일 파일. 페이즈 단위 ## 헤더 분리.
 > 작업 후 `[ ]` → `[x]` 체크. 새 작업은 적절한 페이즈에 추가.
 
-**진행률: 72 / 130**  ✅72 / 🔄58  *(Phase 1 완료 + Phase 2 부분 완료 + Phase 3 부분 완료 + 토스 풀 결제 흐름 완료 + CLI/cron/analytics 신규 구현 완료, 카카오 OAuth Provider 설정 + Storage Policies UI 대기)*
+**진행률: 85 / 145**  ✅85 / 🔄60  *(Phase 1 완료 + Phase 2 부분 완료 + Phase 3 부분 완료 + 토스 풀 결제 흐름 완료 + CLI/cron/analytics 신규 구현 완료, 카카오 OAuth Provider 설정 + Storage Policies UI 대기)*
 
 | 표기 | 의미 |
 |---|---|
@@ -30,6 +30,21 @@
   - 1순위 YOLOv8n MPS는 AGPL-3.0 SaaS 배포 시 전체 소스 공개 의무 → 회피
   - 2순위 MediaPipe Apache 2.0 — 인물 중심 일본 콘텐츠에 적합
 - [ ] 〔dev-team〕 PoC scripts/01~05 실제 구현 (API 키 발급 후) — 골격은 완료
+- [x] 〔dev-team〕 09-styled-bench.ts 강조 효과 강화 — title_segments 시간 분할 + punch_zoom 1.15x/1.30x (505 라인, verifier-team PASS) — 2026-05-10
+- [x] 〔dev-team〕 09-styled-bench.ts v2~v5 — TITLE 검은배너+빨강노랑 / MAIN 검은박스 / NARR 화자분리 / TTS narration 분리 / loudnorm / 줌 escape 수정 (총 ~750 라인) — 2026-05-10
+- [x] 🔴 〔db-guard-team〕 0009_pair_orientation 마이그 적용 — shorts_pairs.orientation enum vertical|horizontal default vertical — 2026-05-10
+- [x] 🔴 〔dev-team〕 페어 등록 폼 Phase A UX — 3섹션 그룹화 + orientation 라디오 + 툴팁 + 안내문구 + 등록 후 router.push 페어상세 — 2026-05-10
+- [x] 〔dev-team〕 /api/pairs route.ts orientation 검증+INSERT — ALLOWED_ORIENTATION 체크, default 'vertical' fallback — 2026-05-10
+- [x] 〔verifier-team〕 Phase A 검증 — tsc 0 errors / 신규 lint 0 / 폼·API·회귀 모두 PASS — 2026-05-10
+- [x] 〔dev-team〕 Phase B-① PoC 가로 letterbox 분기 — orientation horizontal 인자, NARR/MAIN/HIGH MarginV·폰트 분기 (737→814) — 2026-05-10
+- [x] 〔dev-team〕 Phase B-② youtubeMeta 자동 생성 — GPT 프롬프트에 youtube_title/description/tags 추가, meta.json 저장 — 2026-05-10
+- [x] 〔dev-team〕 Phase B-③ 썸네일 자동 생성 — generateThumbnail() 신규, ffmpeg -ss 프레임 추출, 1080×1920 pad — 2026-05-10
+- [x] 🔴 〔dev-team〕 Phase B-④A worker 인프라 — emitStage()/wrap() 8 stage + cli-worker.ts (448) + upload-output.ts + complete API metadata 머지 — 2026-05-10
+- [x] 🔴 〔dev-team〕 Phase B-④B UI 통합 — thumbnail/route.ts (75) + thumbnail-preview.tsx (94) + meta-editor prefill + page.tsx grid 2col — 2026-05-10
+- [x] 〔verifier-team〕 Phase B-④ 검증 — tsc 0 / build 37 routes / cli-worker --help/--once OK / UI 회귀 0 — 2026-05-10
+- [x] 〔부장〕 .env.example WORKER_* 4개 추가 (WORKER_API_BASE/KEY/ID/POC_PATH) — 2026-05-10
+- [ ] 〔doc-sync-team〕 워커 셋업 가이드 — CLAUDE.md 또는 docs/WORKER.md 에 launchctl plist + .env 설정 + 트러블슈팅 (P3 정리)
+- [ ] 〔dev-team〕 P3 정리 — PoC download wrap 제거 (워커가 선보고 후 PoC 가 또 보고하는 중복 stage row)
 - [ ] 〔부장〕 PoC 6항목 합산 GO/NO-GO — `99-poc-report.ts` 실행 → Phase 1 진입 결정
 
 ---

@@ -1,6 +1,14 @@
+"use client";
+
 /**
- * 변환 단계 7개 + 진행률 표시 (전체 % + stage 별 가중치)
+ * 변환 단계 7개 + 진행률 표시 (전체 % + stage 별 가중치).
+ * 각 stage 의 산출물(중간 파일) 절대경로를 metadata.artifacts 에서 읽어 표시 +
+ * 📂 버튼으로 macOS Finder 에서 파일 선택 상태로 열기 (DEV + 슈퍼어드민만).
  */
+import { useTransition, useState } from "react";
+import { FolderOpen } from "lucide-react";
+import { revealInFinder } from "../_actions";
+
 const STAGE_ORDER = [
   "download",
   "stt",
@@ -56,7 +64,45 @@ export type StageJob = {
   started_at: string | null;
   finished_at: string | null;
   error_message: string | null;
+  metadata: Record<string, unknown> | null;
 };
+
+function basename(p: string): string {
+  const i = Math.max(p.lastIndexOf("/"), p.lastIndexOf("\\"));
+  return i >= 0 ? p.slice(i + 1) : p;
+}
+
+function ArtifactItem({ absPath }: { absPath: string }) {
+  const [pending, startTransition] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+
+  const onClick = () => {
+    setErr(null);
+    startTransition(async () => {
+      const r = await revealInFinder(absPath);
+      if (!r.ok) setErr(r.error);
+    });
+  };
+
+  return (
+    <span className="inline-flex items-center gap-1 text-xs rounded bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5">
+      <span className="font-mono break-all" title={absPath}>
+        {basename(absPath)}
+      </span>
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={pending}
+        title={err ?? "Finder 에서 열기 (DEV 전용)"}
+        className="ml-0.5 p-0.5 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50"
+        aria-label="Finder 에서 파일 열기"
+      >
+        <FolderOpen className="w-3.5 h-3.5" />
+      </button>
+      {err && <span className="text-[10px] text-red-600">{err}</span>}
+    </span>
+  );
+}
 
 export function StageList({ jobs }: { jobs: StageJob[] }) {
   // stage 별 최신 row 매핑
@@ -111,6 +157,15 @@ export function StageList({ jobs }: { jobs: StageJob[] }) {
           const stagePct =
             status === "done" ? 100 : status === "running" ? 50 : status === "failed" ? 0 : 0;
 
+          // metadata.artifacts: string[] (절대경로). 없으면 빈 배열 — 회귀 안전.
+          const artifacts = Array.isArray(
+            (j?.metadata as { artifacts?: unknown } | null)?.artifacts,
+          )
+            ? ((j!.metadata as { artifacts: unknown[] }).artifacts.filter(
+                (x): x is string => typeof x === "string" && x.length > 0,
+              ))
+            : [];
+
           return (
             <li
               key={s}
@@ -151,6 +206,13 @@ export function StageList({ jobs }: { jobs: StageJob[] }) {
               </span>
               {j?.error_message && (
                 <p className="basis-full text-xs text-red-600 break-words">{j.error_message}</p>
+              )}
+              {artifacts.length > 0 && (
+                <div className="basis-full pt-1 flex flex-wrap gap-1.5">
+                  {artifacts.map((p) => (
+                    <ArtifactItem key={p} absPath={p} />
+                  ))}
+                </div>
               )}
             </li>
           );

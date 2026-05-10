@@ -10,6 +10,7 @@ import { MetaEditor } from "./_components/meta-editor";
 import { DeleteButton } from "./_components/delete-button";
 import { StageList, type StageJob } from "./_components/stage-list";
 import { VoicePicker } from "./_components/voice-picker";
+import { ThumbnailPreview } from "./_components/thumbnail-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -52,14 +53,22 @@ export default async function PairDetailPage({
   const resultMeta = (p.original_meta?.result ?? null) as
     | { title?: string; description?: string; tags?: string[] }
     | null;
+  const youtubeMeta = (p.original_meta?.youtube_meta ?? null) as
+    | { title?: string; description?: string; tags?: string[] }
+    | null;
+  const thumbnailStoragePath =
+    typeof p.original_meta?.thumbnail_storage_path === "string"
+      ? (p.original_meta.thumbnail_storage_path as string)
+      : null;
   const voiceMeta = (p.original_meta?.voice ?? null) as
     | { voice_id?: string; model_id?: string }
     | null;
   if (p.channels && p.channels.owner_id !== user.id) notFound();
+  const reviewReady = ["review", "uploaded", "published"].includes(p.status);
 
   const { data: jobs } = await supabase
     .from("conversion_jobs")
-    .select("id, stage, status, attempt, started_at, finished_at, error_message")
+    .select("id, stage, status, attempt, started_at, finished_at, error_message, metadata")
     .eq("pair_id", id)
     .order("started_at", { ascending: true });
   const jobList = (jobs ?? []) as StageJob[];
@@ -96,16 +105,23 @@ export default async function PairDetailPage({
 
       <section className="space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <h2 className="font-semibold text-sm">결과 영상</h2>
+          <h2 className="font-semibold text-sm">결과 영상 · 썸네일</h2>
           <RetryButton pairId={p.id} status={p.status} />
         </div>
-        <OutputPlayer pairId={p.id} status={p.status} />
+        {reviewReady ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <OutputPlayer pairId={p.id} status={p.status} />
+            <ThumbnailPreview pairId={p.id} thumbnailStoragePath={thumbnailStoragePath} />
+          </div>
+        ) : (
+          <OutputPlayer pairId={p.id} status={p.status} />
+        )}
         <ReviewActions pairId={p.id} status={p.status} />
       </section>
 
       <section className="space-y-2">
         <h2 className="font-semibold text-sm">업로드 메타</h2>
-        <MetaEditor pairId={p.id} initial={resultMeta} />
+        <MetaEditor pairId={p.id} initial={resultMeta} youtubeMeta={youtubeMeta} />
       </section>
 
       <section className="space-y-2">

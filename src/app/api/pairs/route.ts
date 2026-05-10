@@ -8,6 +8,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 const ALLOWED_LICENSE = ["cc", "self_filmed"] as const;
+const ALLOWED_ORIENTATION = ["vertical", "horizontal"] as const;
 const URL_REGEX = /^https?:\/\/[^\s]+$/i;
 const FREE_PAIR_LIMIT = 2;
 
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
     channel_id?: string;
     korean_url?: string;
     original_url?: string;
+    orientation?: string;
     license_source?: string;
     license_evidence_url?: string;
     start_seconds?: number;
@@ -50,6 +52,7 @@ export async function POST(request: NextRequest) {
   const channelId = body.channel_id?.trim();
   const koreanUrl = body.korean_url?.trim();
   const originalUrl = body.original_url?.trim() || null;
+  const orientation = (body.orientation?.trim() || "vertical") as string;
   const licenseSource = body.license_source?.trim();
   const licenseEvidenceUrl = body.license_evidence_url?.trim();
 
@@ -66,6 +69,12 @@ export async function POST(request: NextRequest) {
   ) {
     return NextResponse.json(
       { error: "license_source: 'cc' 또는 'self_filmed'" },
+      { status: 400 },
+    );
+  }
+  if (!(ALLOWED_ORIENTATION as readonly string[]).includes(orientation)) {
+    return NextResponse.json(
+      { error: "orientation: 'vertical' 또는 'horizontal'" },
       { status: 400 },
     );
   }
@@ -122,6 +131,7 @@ export async function POST(request: NextRequest) {
       channel_id: channelId,
       korean_url: koreanUrl,
       original_url: originalUrl,
+      orientation,
       license_source: licenseSource,
       license_evidence_url: licenseEvidenceUrl,
       original_meta: { start_seconds: startSeconds, duration },
